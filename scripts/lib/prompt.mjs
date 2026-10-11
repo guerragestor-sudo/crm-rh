@@ -1,5 +1,6 @@
-// Leitura de senha sem eco: lê tecla por tecla em modo raw e não escreve nada
-// do que é digitado (nem asteriscos). Ctrl+C cancela.
+// Leitura de senha sem eco do texto: lê tecla por tecla em modo raw e mostra
+// apenas um "*" por caractere. Ignora sequências de escape do terminal (setas,
+// marcadores de "colar" \e[200~ … \e[201~). Ctrl+C cancela.
 export function askHidden(question) {
   const stdin = process.stdin;
   if (!stdin.isTTY) {
@@ -7,6 +8,7 @@ export function askHidden(question) {
   }
   return new Promise((resolve) => {
     let value = "";
+    let escape = false;
     // Desliga o eco ANTES de exibir a pergunta: nada digitado chega a aparecer.
     stdin.setRawMode(true);
     stdin.setEncoding("utf8");
@@ -23,14 +25,30 @@ export function askHidden(question) {
 
     function onData(chunk) {
       for (const char of chunk) {
+        if (escape) {
+          // Fim de uma sequência CSI: letra ou "~".
+          if (/[A-Za-z~]/.test(char)) escape = false;
+          continue;
+        }
+        if (char === "\u001b") {
+          escape = true;
+          continue;
+        }
         if (char === "\r" || char === "\n" || char === "\u0004") return finish();
         if (char === "\u0003") {
           stdin.setRawMode(false);
           process.stdout.write("\nCancelado.\n");
           process.exit(130);
         }
-        if (char === "\u007f" || char === "\b") value = value.slice(0, -1);
-        else if (char >= " ") value += char;
+        if (char === "\u007f" || char === "\b") {
+          if (value.length > 0) {
+            value = value.slice(0, -1);
+            process.stdout.write("\b \b");
+          }
+        } else if (char >= " ") {
+          value += char;
+          process.stdout.write("*");
+        }
       }
     }
 

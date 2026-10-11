@@ -33,7 +33,7 @@ for (let page = 1; !user; page++) {
 }
 if (!user) fail(`Usuário ${email} não encontrado.`);
 
-const password = await askHidden("Nova senha (mín. 8, letras e números; não aparece na tela): ");
+const password = await askHidden("Nova senha (mín. 8, letras e números): ");
 const weak = validatePassword(password);
 if (weak) fail(weak);
 const confirmation = await askHidden("Confirme a nova senha: ");

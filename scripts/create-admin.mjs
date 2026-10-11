@@ -38,7 +38,7 @@ function slugify(text) {
     .replace(/(^-|-$)/g, "");
 }
 
-const password = await askHidden("Senha do administrador (mín. 8, letras e números; não aparece na tela): ");
+const password = await askHidden("Senha do administrador (mín. 8, letras e números): ");
 const weak = validatePassword(password);
 if (weak) fail(weak);
 const confirmation = await askHidden("Confirme a senha: ");
