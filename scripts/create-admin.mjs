@@ -6,7 +6,7 @@
 // Requer NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY no arquivo de ambiente.
 import { createClient } from "@supabase/supabase-js";
 import { parseArgs } from "node:util";
-import readline from "node:readline";
+import { askHidden, validatePassword } from "./lib/prompt.mjs";
 
 const { values } = parseArgs({
   options: {
@@ -29,20 +29,6 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secretKey = process.env.SUPABASE_SECRET_KEY;
 if (!url || !secretKey) fail("Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY.");
 
-function askHidden(question) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-    rl._writeToOutput = (text) => {
-      if (text.includes(question)) rl.output.write(text);
-    };
-    rl.question(question, (answer) => {
-      rl.close();
-      process.stdout.write("\n");
-      resolve(answer);
-    });
-  });
-}
-
 function slugify(text) {
   return text
     .normalize("NFD")
@@ -52,10 +38,9 @@ function slugify(text) {
     .replace(/(^-|-$)/g, "");
 }
 
-const password = await askHidden("Senha do administrador (mín. 8, letras e números): ");
-if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
-  fail("Senha fraca: use ao menos 8 caracteres com letras e números.");
-}
+const password = await askHidden("Senha do administrador (mín. 8, letras e números; não aparece na tela): ");
+const weak = validatePassword(password);
+if (weak) fail(weak);
 const confirmation = await askHidden("Confirme a senha: ");
 if (confirmation !== password) fail("As senhas não conferem.");
 

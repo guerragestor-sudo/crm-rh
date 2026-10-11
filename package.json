@@ -16,7 +16,9 @@
     "create-admin": "node --env-file=.env.local scripts/create-admin.mjs",
     "check": "npm run typecheck && npm run lint && npm test && npm run db:test && npm run build",
     "test:e2e": "supabase db reset && next build && playwright test",
-    "create-admin:prod": "node --env-file=.env.prod-admin scripts/create-admin.mjs"
+    "create-admin:prod": "node --env-file=.env.prod-admin scripts/create-admin.mjs",
+    "set-password": "node --env-file=.env.local scripts/set-password.mjs",
+    "set-password:prod": "node --env-file=.env.prod-admin scripts/set-password.mjs"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

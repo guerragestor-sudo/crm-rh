@@ -133,7 +133,11 @@ Use o e-mail de **quem vai operar o CRM** (a recrutadora).
    ```bash
    npm run create-admin:prod -- --email SEU_EMAIL+qa@SEU_DOMINIO --name "QA" --org "QA Testes"
    ```
-6. [ ] **Apague o arquivo da chave secreta:**
+6. [ ] **Trocar a senha de um usuário** (não há tela de "esqueci a senha" no MVP). Com o `.env.prod-admin` presente, rode o comando abaixo e digite a nova senha duas vezes; ela não aparece na tela:
+   ```bash
+   npm run set-password:prod -- --email EMAIL_DO_USUARIO
+   ```
+7. [ ] **Apague o arquivo da chave secreta:**
    ```bash
    rm .env.prod-admin
    ```
