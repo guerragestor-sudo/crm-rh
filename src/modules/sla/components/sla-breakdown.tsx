@@ -1,6 +1,16 @@
 import { formatDays } from "@/lib/format";
 
-import type { SlaBreakdownRow } from "../queries";
+import type { SlaBreakdownRow, SlaGroup } from "../queries";
+
+/** Mesmo texto usado no Dashboard para registros sem o campo preenchido. */
+const EMPTY_LABEL: Record<SlaGroup, string> = {
+  status: "Sem status",
+  region: "Não informada",
+  source: "Não informada",
+  manager: "Sem gerente",
+  segment: "Não informado",
+  month: "—",
+};
 
 function monthLabel(key: string | null) {
   if (!key || !/^\d{4}-\d{2}$/.test(key)) return key ?? "—";
@@ -8,7 +18,9 @@ function monthLabel(key: string | null) {
   return new Date(year, month - 1, 1).toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
 }
 
-export function SlaBreakdown({ rows, isMonth }: { rows: SlaBreakdownRow[]; isMonth: boolean }) {
+export function SlaBreakdown({ rows, group }: { rows: SlaBreakdownRow[]; group: SlaGroup }) {
+  const isMonth = group === "month";
+  const label = (row: SlaBreakdownRow) => (isMonth ? monthLabel(row.key) : row.key === null ? EMPTY_LABEL[group] : row.name);
   if (rows.length === 0) {
     return <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Sem dados para os filtros.</p>;
   }
@@ -21,7 +33,7 @@ export function SlaBreakdown({ rows, isMonth }: { rows: SlaBreakdownRow[]; isMon
         {rows.map((row) => (
           <li key={row.key ?? "none"} className="rounded-xl border bg-card p-3 shadow-xs">
             <div className="flex items-center justify-between gap-2">
-              <p className="truncate font-medium">{isMonth ? monthLabel(row.key) : row.name}</p>
+              <p className="truncate font-medium">{label(row)}</p>
               <span className="text-xs text-muted-foreground">{row.completed_count} integrados</span>
             </div>
             <dl className="mt-2 grid grid-cols-3 gap-2 text-xs">
@@ -72,7 +84,7 @@ export function SlaBreakdown({ rows, isMonth }: { rows: SlaBreakdownRow[]; isMon
           <tbody className="divide-y">
             {rows.map((row) => (
               <tr key={row.key ?? "none"}>
-                <td className="px-4 py-2.5 font-medium">{isMonth ? monthLabel(row.key) : row.name}</td>
+                <td className="px-4 py-2.5 font-medium">{label(row)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{row.completed_count}</td>
                 <td className="px-3 py-2.5">
                   <div className="flex items-center gap-2">

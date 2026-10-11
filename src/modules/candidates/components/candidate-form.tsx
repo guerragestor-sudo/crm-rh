@@ -76,6 +76,11 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
     if (response.ok) setDuplicates(response.data);
   }
 
+  /** register + defaultValue: o HTML do servidor já sai com os valores (sem "piscar" vazio antes do JS). */
+  function reg(name: keyof CandidateFormValues, options?: Parameters<typeof register>[1]) {
+    return { ...register(name, options), defaultValue: defaultValues[name] };
+  }
+
   function fieldError(name: keyof CandidateFormValues) {
     return errors[name]?.message;
   }
@@ -175,7 +180,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
         </h2>
         <div className="grid gap-4 rounded-xl border bg-card p-4 shadow-xs md:grid-cols-2 md:p-5">
           <FormField id="full_name" label="Nome completo" required error={fieldError("full_name")} className="md:col-span-2">
-            <Input id="full_name" autoComplete="off" className={inputClass} {...register("full_name")} {...ariaFor("full_name")} />
+            <Input id="full_name" autoComplete="off" className={inputClass} {...reg("full_name")} {...ariaFor("full_name")} />
           </FormField>
           <FormField id="phone" label="Telefone / WhatsApp" error={fieldError("phone")} hint="Com DDD. Usado para ligar e abrir o WhatsApp.">
             <Input
@@ -185,7 +190,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
               autoComplete="off"
               placeholder="(11) 98888-7777"
               className={inputClass}
-              {...register("phone", {
+              {...reg("phone", {
                 onBlur: (event) => {
                   const normalized = normalizePhone(event.target.value);
                   if (normalized) setValue("phone", formatPhone(normalized));
@@ -203,7 +208,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
               autoComplete="off"
               autoCapitalize="none"
               className={inputClass}
-              {...register("email", { onBlur: () => void checkDuplicates() })}
+              {...reg("email", { onBlur: () => void checkDuplicates() })}
               {...ariaFor("email")}
             />
           </FormField>
@@ -214,7 +219,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
               autoComplete="off"
               placeholder="000.000.000-00"
               className={inputClass}
-              {...register("cpf", {
+              {...reg("cpf", {
                 onBlur: (event) => {
                   if (isValidCpf(event.target.value)) setValue("cpf", formatCpf(event.target.value));
                   void checkDuplicates();
@@ -236,7 +241,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
         </h2>
         <div className="grid gap-4 rounded-xl border bg-card p-4 shadow-xs md:grid-cols-2 md:p-5">
           <FormField id="region_id" label="Região" error={fieldError("region_id")}>
-            <NativeSelect id="region_id" {...register("region_id")}>
+            <NativeSelect id="region_id" {...reg("region_id")}>
               <option value="">Não informada</option>
               {selectable(options.regions, defaultValues.region_id).map((item) => (
                 <option key={item.id} value={item.id}>
@@ -246,7 +251,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
             </NativeSelect>
           </FormField>
           <FormField id="segment_id" label="Ramo" error={fieldError("segment_id")}>
-            <NativeSelect id="segment_id" {...register("segment_id")}>
+            <NativeSelect id="segment_id" {...reg("segment_id")}>
               <option value="">Não informado</option>
               {selectable(options.segments, defaultValues.segment_id).map((item) => (
                 <option key={item.id} value={item.id}>
@@ -256,7 +261,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
             </NativeSelect>
           </FormField>
           <FormField id="availability" label="Disponibilidade" error={fieldError("availability")}>
-            <NativeSelect id="availability" {...register("availability")}>
+            <NativeSelect id="availability" {...reg("availability")}>
               <option value="">Não informada</option>
               {AVAILABILITY_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -266,7 +271,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
             </NativeSelect>
           </FormField>
           <FormField id="source_id" label="Origem / captação" error={fieldError("source_id")}>
-            <NativeSelect id="source_id" {...register("source_id")}>
+            <NativeSelect id="source_id" {...reg("source_id")}>
               <option value="">Não informada</option>
               {selectable(options.sources, defaultValues.source_id).map((item) => (
                 <option key={item.id} value={item.id}>
@@ -303,7 +308,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
         </h2>
         <div className="grid gap-4 rounded-xl border bg-card p-4 shadow-xs md:grid-cols-2 md:p-5">
           <FormField id="status_id" label="Status" required error={fieldError("status_id")}>
-            <NativeSelect id="status_id" {...register("status_id")} {...ariaFor("status_id")}>
+            <NativeSelect id="status_id" {...reg("status_id")} {...ariaFor("status_id")}>
               <option value="" disabled>
                 Selecione
               </option>
@@ -317,7 +322,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
             </NativeSelect>
           </FormField>
           <FormField id="manager_id" label="Gerente de indicação / destino" error={fieldError("manager_id")}>
-            <NativeSelect id="manager_id" {...register("manager_id")}>
+            <NativeSelect id="manager_id" {...reg("manager_id")}>
               <option value="">Sem gerente</option>
               {selectable(options.managers, defaultValues.manager_id).map((item) => (
                 <option key={item.id} value={item.id}>
@@ -333,7 +338,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
               error={fieldError("status_reason")}
               className="md:col-span-2"
             >
-              <Input id="status_reason" className={inputClass} {...register("status_reason")} />
+              <Input id="status_reason" className={inputClass} {...reg("status_reason")} />
             </FormField>
           ) : null}
           {managerChanged ? (
@@ -343,11 +348,11 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
               error={fieldError("manager_reason")}
               className="md:col-span-2"
             >
-              <Input id="manager_reason" className={inputClass} {...register("manager_reason")} />
+              <Input id="manager_reason" className={inputClass} {...reg("manager_reason")} />
             </FormField>
           ) : null}
           <FormField id="interview_at" label="Data da entrevista" error={fieldError("interview_at")}>
-            <Input id="interview_at" type="datetime-local" className={inputClass} {...register("interview_at")} {...ariaFor("interview_at")} />
+            <Input id="interview_at" type="datetime-local" className={inputClass} {...reg("interview_at")} {...ariaFor("interview_at")} />
           </FormField>
           <FormField
             id="integration_date"
@@ -360,12 +365,12 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
               type="date"
               max={today}
               className={inputClass}
-              {...register("integration_date")}
+              {...reg("integration_date")}
               {...ariaFor("integration_date")}
             />
           </FormField>
           <FormField id="notes" label="Observação" error={fieldError("notes")} className="md:col-span-2">
-            <Textarea id="notes" rows={4} className="text-base md:text-sm" {...register("notes")} {...ariaFor("notes")} />
+            <Textarea id="notes" rows={4} className="text-base md:text-sm" {...reg("notes")} {...ariaFor("notes")} />
           </FormField>
         </div>
       </section>
@@ -409,10 +414,10 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
             />
           </div>
           <FormField id="documentation_notes" label="Informações de cadastro / documentação" error={fieldError("documentation_notes")}>
-            <Textarea id="documentation_notes" rows={3} className="text-base md:text-sm" {...register("documentation_notes")} />
+            <Textarea id="documentation_notes" rows={3} className="text-base md:text-sm" {...reg("documentation_notes")} />
           </FormField>
           <FormField id="course_notes" label="Informações do curso" error={fieldError("course_notes")}>
-            <Textarea id="course_notes" rows={3} className="text-base md:text-sm" {...register("course_notes")} />
+            <Textarea id="course_notes" rows={3} className="text-base md:text-sm" {...reg("course_notes")} />
           </FormField>
         </div>
       </section>

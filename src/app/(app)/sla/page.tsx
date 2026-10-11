@@ -103,7 +103,7 @@ export default async function SlaPage({ searchParams }: PageProps<"/sla">) {
             })}
           </nav>
         </div>
-        <SlaBreakdown rows={breakdown} isMonth={group === "month"} />
+        <SlaBreakdown rows={breakdown} group={group} />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">

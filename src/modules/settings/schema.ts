@@ -5,10 +5,10 @@ import { STATUS_COLORS } from "@/lib/status-colors";
 export const LOOKUP_KINDS = ["regions", "segments", "sources"] as const;
 export type LookupKind = (typeof LOOKUP_KINDS)[number];
 
-export const LOOKUP_LABELS: Record<LookupKind, { singular: string; plural: string }> = {
-  regions: { singular: "região", plural: "Regiões" },
-  segments: { singular: "ramo", plural: "Ramos" },
-  sources: { singular: "origem", plural: "Origens" },
+export const LOOKUP_LABELS: Record<LookupKind, { singular: string; plural: string; newLabel: string }> = {
+  regions: { singular: "região", plural: "Regiões", newLabel: "Nova região" },
+  segments: { singular: "ramo", plural: "Ramos", newLabel: "Novo ramo" },
+  sources: { singular: "origem", plural: "Origens", newLabel: "Nova origem" },
 };
 
 const name = (max: number) =>

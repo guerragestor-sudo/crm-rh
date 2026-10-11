@@ -97,7 +97,7 @@ export function LookupList({ kind, items }: { kind: LookupKind; items: Option[] 
         }}
       >
         <Input
-          aria-label={`Nova ${labels.singular}`}
+          aria-label={labels.newLabel}
           placeholder={`Adicionar ${labels.singular}`}
           value={newName}
           onChange={(event) => setNewName(event.target.value)}
