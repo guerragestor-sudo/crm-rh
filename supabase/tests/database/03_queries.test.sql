@@ -1,6 +1,10 @@
 -- Filtros combinados, busca, duplicidade, dashboard e SLA: semântica e isolamento.
 begin;
 create extension if not exists pgtap with schema extensions;
+-- No Supabase remoto a CLI conecta como cli_login_postgres, sem acesso ao schema
+-- "extensions" (onde fica o pgTAP): os testes rodam como postgres.
+set local role postgres;
+set local search_path to public, extensions;
 
 select plan(19);
 

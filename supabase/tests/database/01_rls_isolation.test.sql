@@ -1,6 +1,10 @@
 -- Isolamento entre organizações, privilégios por coluna e papéis.
 begin;
 create extension if not exists pgtap with schema extensions;
+-- No Supabase remoto a CLI conecta como cli_login_postgres, sem acesso ao schema
+-- "extensions" (onde fica o pgTAP): os testes rodam como postgres.
+set local role postgres;
+set local search_path to public, extensions;
 
 select plan(31);
 
@@ -191,7 +195,7 @@ select is(
 -- -----------------------------------------------------------------------------
 -- Anônimo
 -- -----------------------------------------------------------------------------
-reset role;
+set local role postgres;
 set local role anon;
 select throws_ok(
   $$ select 1 from public.candidates $$,
