@@ -45,9 +45,7 @@ export function CandidateCard({
           <SlaChip days={candidate.sla_days} integrated={Boolean(candidate.integration_date)} target={slaTarget} />
         </div>
       </Link>
-      {candidate.phone || candidate.email ? (
-        <ContactActions phone={candidate.phone} email={candidate.email} className="mt-3 border-t pt-3" />
-      ) : null}
+      <ContactActions phone={candidate.phone} email={candidate.email} className="mt-3 border-t pt-3" />
     </article>
   );
 }

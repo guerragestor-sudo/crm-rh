@@ -6,6 +6,7 @@ import { formatPhone } from "@/lib/phone";
 
 import { AVAILABILITY_LABELS, COURSE_LABELS, DOCUMENTATION_LABELS } from "../labels";
 import type { CandidateDetail } from "../types";
+import { PendingPhoneBadge } from "./pending-phone-badge";
 
 function Item({ label, children, wide = false }: { label: string; children: ReactNode; wide?: boolean }) {
   return (
@@ -40,7 +41,7 @@ export function CandidateDetails({
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
       <Group title="Contato">
-        <Item label="Telefone / WhatsApp">{candidate.phone ? formatPhone(candidate.phone) : null}</Item>
+        <Item label="Telefone / WhatsApp">{candidate.phone ? formatPhone(candidate.phone) : <PendingPhoneBadge />}</Item>
         <Item label="E-mail">{candidate.email}</Item>
         <Item label="CPF">{candidate.cpf ? formatCpf(candidate.cpf) : null}</Item>
       </Group>

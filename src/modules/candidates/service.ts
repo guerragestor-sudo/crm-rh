@@ -39,22 +39,44 @@ export async function findDuplicates(
   return (data ?? []) as DuplicateMatch[];
 }
 
-async function assertCpfAvailable(supabase: SupabaseServerClient, cpf: string | null, excludeId?: string) {
-  if (!cpf) return;
-  const matches = await findDuplicates(supabase, { cpf, excludeId });
-  const existing = matches.find((match) => match.match === "cpf");
-  if (existing) {
-    throw new AppError(
-      "CONFLICT",
-      `Já existe um candidato com este CPF: ${existing.full_name}.`,
-      { cpf: ["CPF já cadastrado."] },
-      { duplicateId: existing.id },
-    );
+/**
+ * Duplicidade que bloqueia: telefone ou CPF (quando preenchido) já cadastrados na
+ * organização. E-mail repetido só gera aviso no formulário.
+ */
+async function assertNoBlockingDuplicate(
+  supabase: SupabaseServerClient,
+  write: { phone: string | null; cpf: string | null },
+  excludeId?: string,
+) {
+  if (write.phone) {
+    const [existing] = await findDuplicates(supabase, { phone: write.phone, excludeId });
+    if (existing) {
+      throw new AppError(
+        "CONFLICT",
+        `Já existe um candidato com este telefone: ${existing.full_name}.`,
+        { phone: ["Telefone já cadastrado."] },
+        { duplicateId: existing.id },
+      );
+    }
+  }
+  if (write.cpf) {
+    const [existing] = await findDuplicates(supabase, { cpf: write.cpf, excludeId });
+    if (existing) {
+      throw new AppError(
+        "CONFLICT",
+        `Já existe um candidato com este CPF: ${existing.full_name}.`,
+        { cpf: ["CPF já cadastrado."] },
+        { duplicateId: existing.id },
+      );
+    }
   }
 }
 
 function mapWriteError(error: { code?: string; message?: string }, op: string): AppError {
   if (error.code === "23505") {
+    if (error.message?.includes("candidates_org_phone_uq")) {
+      return new AppError("CONFLICT", "Já existe um candidato com este telefone.", { phone: ["Telefone já cadastrado."] });
+    }
     return new AppError("CONFLICT", "Já existe um candidato com este CPF.", { cpf: ["CPF já cadastrado."] });
   }
   return fromDatabaseError(error, { op });
@@ -68,7 +90,7 @@ export async function createCandidate(
   const values = parseForm(input);
   const { timezone } = await getAppContext();
   const write = toCandidateWrite(values, timezone);
-  await assertCpfAvailable(supabase, write.cpf);
+  await assertNoBlockingDuplicate(supabase, write);
 
   const { data, error } = await supabase
     .from("candidates")
@@ -105,7 +127,7 @@ export async function updateCandidate(
   if (!current) throw new AppError("NOT_FOUND", "Candidato não encontrado.");
   if (current.archived_at) throw new AppError("VALIDATION", "Candidato arquivado não pode ser editado.");
 
-  await assertCpfAvailable(supabase, write.cpf, id);
+  await assertNoBlockingDuplicate(supabase, write, id);
 
   const { error } = await supabase.from("candidates").update(write).eq("id", id);
   if (error) throw mapWriteError(error, "update_candidate");

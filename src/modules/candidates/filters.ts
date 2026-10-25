@@ -26,6 +26,7 @@ export const candidateFiltersSchema = z.object({
   integration: z.enum(["done", "pending"]).optional(),
   no_next_action: z.boolean().optional(),
   has_overdue_task: z.boolean().optional(),
+  missing_phone: z.boolean().optional(),
   archived: z.boolean().optional(),
 });
 
@@ -33,7 +34,7 @@ export type CandidateFilters = z.infer<typeof candidateFiltersSchema>;
 
 const LIST_KEYS = ["status_ids", "region_ids", "source_ids", "manager_ids", "segment_ids"] as const;
 const DATE_KEYS = ["created_from", "created_to", "integration_from", "integration_to"] as const;
-const FLAG_KEYS = ["no_next_action", "has_overdue_task", "archived"] as const;
+const FLAG_KEYS = ["no_next_action", "has_overdue_task", "missing_phone", "archived"] as const;
 
 type SearchParamsInput = Record<string, string | string[] | undefined> | URLSearchParams;
 

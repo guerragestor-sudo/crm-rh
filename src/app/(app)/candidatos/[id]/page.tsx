@@ -132,9 +132,7 @@ export default async function CandidatePage({ params }: PageProps<"/candidatos/[
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {candidate.phone || candidate.email ? (
-            <ContactActions phone={candidate.phone} email={candidate.email} size="lg" showLabels className="flex-wrap" />
-          ) : null}
+          <ContactActions phone={candidate.phone} email={candidate.email} size="lg" showLabels className="flex-wrap" />
           {currentResume ? (
             <Button asChild variant="outline" className="h-11">
               <a href={`/api/documentos/${currentResume.id}`} target="_blank" rel="noopener noreferrer">

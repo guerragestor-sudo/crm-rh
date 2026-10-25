@@ -297,6 +297,12 @@ export function FilterSheet({
                 >
                   Sem próxima ação
                 </ToggleChip>
+                <ToggleChip
+                  active={Boolean(draft.missing_phone)}
+                  onClick={() => setField("missing_phone", !draft.missing_phone || undefined)}
+                >
+                  Telefone pendente
+                </ToggleChip>
               </div>
             </fieldset>
           ) : null}

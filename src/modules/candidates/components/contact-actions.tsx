@@ -4,7 +4,12 @@ import { Button } from "@/components/ui/button";
 import { telHref, whatsappHref } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 
-/** Ações de contato de um toque (ligar / WhatsApp / e-mail). Sem integração: só abre o app do aparelho. */
+import { PendingPhoneBadge } from "./pending-phone-badge";
+
+/**
+ * Ações de contato de um toque (ligar / WhatsApp / e-mail). Sem integração: só abre o app do aparelho.
+ * Sem telefone, mostra "Telefone pendente" no lugar de ligar/WhatsApp.
+ */
 export function ContactActions({
   phone,
   email,
@@ -40,7 +45,9 @@ export function ContactActions({
             </a>
           </Button>
         </>
-      ) : null}
+      ) : (
+        <PendingPhoneBadge />
+      )}
       {email ? (
         <Button asChild variant="outline" className={cn(buttonSize, !showLabels && "w-11 px-0")}>
           <a href={`mailto:${email}`} aria-label="Enviar e-mail">

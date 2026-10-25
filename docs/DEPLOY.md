@@ -336,3 +336,29 @@ Fazer um teste operacional real, com 10 a 20 candidatos no fluxo verdadeiro:
 Anotar onde há demora, cliques demais e informação faltando. Isso gera a **V2**.
 
 Continuam fora: WhatsApp em massa, discador, IA, automações complexas, cobrança e SaaS comercial.
+
+---
+
+## 11. Importar uma aba da planilha (ESTEIRA)
+
+Script: `scripts/import-planilha.mjs`. Regras de conversão em `scripts/lib/sheet-import.mjs` (com testes em `tests/unit/sheet-import.test.ts`).
+
+1. Exporte a aba para `imports/<aba>.json` no formato da API do Google Sheets (`{ "range": "SETE.26!A1:R120", "values": [...] }`). A pasta `imports/` não vai para o git: são dados pessoais.
+2. Faça o backup do banco (seção 9).
+3. Recrie o arquivo `.env.prod-admin` (seção 5) com a chave secreta.
+4. Relatório prévio. Só lê o banco e grava o relatório em `imports/relatorio-<aba>.md`:
+   ```bash
+   npm run import-planilha:prod -- imports/sete26.json --org "Eliene Recrutamento"
+   ```
+5. Conferido o relatório, grave. É um único INSERT: ou entram todos, ou nenhum. Os ids ficam em `imports/importados-<aba>.json`:
+   ```bash
+   npm run import-planilha:prod -- imports/sete26.json --org "Eliene Recrutamento" --apply
+   ```
+6. Para desfazer (só enquanto não houver tarefas ou documentos nos importados):
+   ```bash
+   npm run import-planilha:prod -- imports/sete26.json --org "Eliene Recrutamento" --undo
+   ```
+7. Apague `.env.prod-admin`.
+
+O script não duplica: rodar de novo bloqueia as linhas cujo telefone (ou nome, para quem está sem telefone) já existe no CRM.
+

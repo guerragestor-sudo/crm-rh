@@ -12,7 +12,7 @@ Registro curto das decisões vigentes. Data de referência: 08/10/2026.
 | P4 | **SLA** em dias civis no fuso da organização. Concluído: `integration_date − data local de created_at`. Em andamento: `hoje − data local de created_at`. Ao preencher a integração, o valor é **congelado** em `sla_days_frozen`; corrigir a data recalcula e registra no histórico. |
 | P5 | `integration_date` não pode ser futura nem anterior à data de cadastro (o SLA perderia sentido). |
 | P6 | `manager_id` = gerente para quem o candidato será direcionado. Após o cadastro, gerente e status só mudam pelas RPCs `change_candidate_manager` / `change_candidate_status`, que registram anterior, novo, autor, data/hora e motivo. |
-| P7 | CPF repetido bloqueia (único por organização). Telefone/e-mail repetidos só geram aviso. |
+| P7 | **Duplicidade pelo telefone** (ajuste de 24/10/2026): telefone repetido bloqueia (único por organização), porque nem todo candidato envia documentos no início. CPF, quando preenchido, também bloqueia. E-mail repetido só gera aviso. Telefone e e-mail são opcionais: sem telefone, a ficha mostra **Telefone pendente** e aparece no filtro de mesmo nome. |
 | P8 | Tarefas têm data livre (sem cadência). Não são excluídas: são canceladas. |
 | P9 | Diretores e gerentes não têm login no MVP. Uso próprio do recrutador (Admin). |
 

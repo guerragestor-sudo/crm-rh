@@ -20,7 +20,9 @@
     "set-password": "node --env-file=.env.local scripts/set-password.mjs",
     "set-password:prod": "node --env-file=.env.prod-admin scripts/set-password.mjs",
     "change-email": "node --env-file=.env.local scripts/change-email.mjs",
-    "change-email:prod": "node --env-file=.env.prod-admin scripts/change-email.mjs"
+    "change-email:prod": "node --env-file=.env.prod-admin scripts/change-email.mjs",
+    "import-planilha": "node --env-file=.env.local scripts/import-planilha.mjs",
+    "import-planilha:prod": "node --env-file=.env.prod-admin scripts/import-planilha.mjs"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

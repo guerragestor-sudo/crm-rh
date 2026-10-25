@@ -9,7 +9,36 @@ test.describe("Celular: cadastro e ficha do candidato", () => {
     await page.goto("/candidatos/novo");
     await page.getByRole("button", { name: "Avançar" }).click();
     await expect(page.getByText("Informe o nome completo.")).toBeVisible();
-    await expect(page.getByText("Informe telefone ou e-mail.")).toBeVisible();
+    // Telefone e e-mail são opcionais (sem telefone: "telefone pendente").
+    await expect(page.getByText("Informe telefone ou e-mail.")).toHaveCount(0);
+  });
+
+  test("telefone repetido é bloqueado (aviso e servidor)", async ({ page }) => {
+    await page.goto("/candidatos/novo");
+    await page.getByLabel("Nome completo").fill("Outra Pessoa Mesmo Telefone");
+    await page.getByLabel("Telefone / WhatsApp").fill("(11) 97000-1371");
+    await page.getByLabel("E-mail").focus();
+    await expect(page.getByText(/Telefone já cadastrado para/)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ana Paula Ferreira" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Salvar", exact: true }).click();
+    await expect(page.getByText("Telefone já cadastrado.", { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/\/candidatos\/novo$/);
+  });
+
+  test("cadastro sem telefone fica com 'Telefone pendente' e aparece no filtro", async ({ page }) => {
+    const name = `Sem Telefone ${uniqueSuffix()}`;
+    await page.goto("/candidatos/novo");
+    await page.getByLabel("Nome completo").fill(name);
+    await page.getByRole("button", { name: "Salvar", exact: true }).click();
+
+    await expect(page.getByRole("heading", { name })).toBeVisible();
+    await expect(page.getByText("Telefone pendente").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ligar" })).toHaveCount(0);
+
+    await page.goto("/candidatos?missing_phone=1");
+    await expect(page.getByRole("link", { name }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Ana Paula Ferreira/ })).toHaveCount(0);
   });
 
   test("CPF repetido é bloqueado (aviso e servidor)", async ({ page }) => {
@@ -27,18 +56,20 @@ test.describe("Celular: cadastro e ficha do candidato", () => {
 
   test("fluxo 'Recebi um novo candidato': cadastro rápido, status, gerente, tarefa e histórico", async ({ page }) => {
     const name = `Teste Mobile ${uniqueSuffix()}`;
+    // Telefone único por execução (telefone repetido bloqueia o cadastro).
+    const phone = `1195${uniqueSuffix()}4`;
     await page.goto("/candidatos/novo");
     await expectNoHorizontalOverflow(page);
     await page.getByLabel("Nome completo").fill(name);
-    await page.getByLabel("Telefone / WhatsApp").fill("11955554444");
+    await page.getByLabel("Telefone / WhatsApp").fill(phone);
     await page.getByLabel("E-mail").fill(`um.email.muito.comprido.para.testar.quebra.${uniqueSuffix()}@empresa-exemplo.com.br`);
     await page.getByRole("button", { name: "Salvar", exact: true }).click();
 
     await expect(page.getByRole("heading", { name })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Ligar" })).toHaveAttribute("href", "tel:+5511955554444");
+    await expect(page.getByRole("link", { name: "Ligar" })).toHaveAttribute("href", `tel:+55${phone}`);
     await expect(page.getByRole("link", { name: "Abrir WhatsApp" }).first()).toHaveAttribute(
       "href",
-      "https://wa.me/5511955554444",
+      `https://wa.me/55${phone}`,
     );
     await expectNoHorizontalOverflow(page);
 

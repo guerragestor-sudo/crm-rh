@@ -182,7 +182,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
           <FormField id="full_name" label="Nome completo" required error={fieldError("full_name")} className="md:col-span-2">
             <Input id="full_name" autoComplete="off" className={inputClass} {...reg("full_name")} {...ariaFor("full_name")} />
           </FormField>
-          <FormField id="phone" label="Telefone / WhatsApp" error={fieldError("phone")} hint="Com DDD. Usado para ligar e abrir o WhatsApp.">
+          <FormField id="phone" label="Telefone / WhatsApp" error={fieldError("phone")} hint="Com DDD. Se ainda não tiver, deixe em branco: a ficha fica com telefone pendente.">
             <Input
               id="phone"
               type="tel"

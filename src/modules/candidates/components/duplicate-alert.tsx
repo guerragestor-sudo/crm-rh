@@ -9,10 +9,16 @@ const MATCH_LABEL: Record<DuplicateMatch["match"], string> = {
   email: "mesmo e-mail",
 };
 
+/** Telefone e CPF repetidos bloqueiam o cadastro; e-mail repetido só avisa. */
+const BLOCKING_LABEL: Partial<Record<DuplicateMatch["match"], string>> = {
+  phone: "Telefone já cadastrado",
+  cpf: "CPF já cadastrado",
+};
+
 export function DuplicateAlert({ matches }: { matches: DuplicateMatch[] }) {
   if (matches.length === 0) return null;
-  const blocking = matches.filter((match) => match.match === "cpf");
-  const warnings = matches.filter((match) => match.match !== "cpf");
+  const blocking = matches.filter((match) => match.match in BLOCKING_LABEL);
+  const warnings = matches.filter((match) => !(match.match in BLOCKING_LABEL));
 
   return (
     <div className="space-y-2" role="status" aria-live="polite">
@@ -20,7 +26,7 @@ export function DuplicateAlert({ matches }: { matches: DuplicateMatch[] }) {
         <div key={match.id} className="flex gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           <Ban className="mt-0.5 size-4 shrink-0" aria-hidden />
           <p>
-            CPF já cadastrado para{" "}
+            {BLOCKING_LABEL[match.match]} para{" "}
             <Link href={`/candidatos/${match.id}`} className="font-medium underline" target="_blank">
               {match.full_name}
             </Link>{" "}

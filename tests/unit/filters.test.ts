@@ -17,6 +17,7 @@ describe("filtros de candidatos", () => {
       status_ids: [B],
       created_from: "2026-01-01",
       no_next_action: true,
+      missing_phone: true,
       integration: "pending" as const,
     };
     const params = filtersToSearchParams(filters);

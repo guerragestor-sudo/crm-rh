@@ -45,7 +45,7 @@ export function CandidateTable({
                   <span className="block truncate">{candidate.full_name}</span>
                 </Link>
                 <span className="block truncate text-xs text-muted-foreground">
-                  {candidate.phone ? formatPhone(candidate.phone) : candidate.email}
+                  {candidate.phone ? formatPhone(candidate.phone) : (candidate.email ?? "Sem telefone")}
                   {" · "}
                   {formatDateTime(candidate.created_at, timezone).slice(0, 10)}
                 </span>

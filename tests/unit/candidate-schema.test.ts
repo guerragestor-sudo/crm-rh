@@ -11,11 +11,18 @@ import {
 const STATUS = "42a84824-34c8-4530-bd65-ade242ed7250";
 
 describe("candidateFormSchema", () => {
-  it("exige nome, status e ao menos um contato", () => {
+  it("exige nome e status", () => {
     const result = candidateFormSchema.safeParse(emptyCandidateForm());
     expect(result.success).toBe(false);
     const paths = result.error!.issues.map((issue) => issue.path.join("."));
-    expect(paths).toEqual(expect.arrayContaining(["full_name", "status_id", "phone"]));
+    expect(paths).toEqual(expect.arrayContaining(["full_name", "status_id"]));
+    expect(paths).not.toContain("phone");
+  });
+
+  it("aceita cadastro sem telefone e sem e-mail (telefone pendente)", () => {
+    const values = { ...emptyCandidateForm(STATUS), full_name: "Maria Silva" };
+    expect(candidateFormSchema.safeParse(values).success).toBe(true);
+    expect(toCandidateWrite(values)).toMatchObject({ phone: null, email: null });
   });
 
   it("aceita cadastro mínimo (nome + telefone + status)", () => {

@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 set local role postgres;
 set local search_path to public, extensions;
 
-select plan(31);
+select plan(33);
 
 -- -----------------------------------------------------------------------------
 -- Fixtures (como postgres)
@@ -148,6 +148,16 @@ select throws_ok(
   $$ insert into public.candidates (full_name, phone, cpf, status_id)
      values ('CPF repetido', '5511900000005', '11144477735', (select status_a2 from ids)) $$,
   '23505', null, 'CPF repetido na mesma organização é bloqueado');
+
+select throws_ok(
+  $$ insert into public.candidates (full_name, phone, status_id)
+     values ('Telefone repetido', '5511900000001', (select status_a2 from ids)) $$,
+  '23505', null, 'Telefone repetido na mesma organização é bloqueado');
+
+select lives_ok(
+  $$ insert into public.candidates (full_name, status_id)
+     values ('Sem contato', (select status_a2 from ids)) $$,
+  'Candidato sem telefone e sem e-mail é aceito (telefone pendente)');
 
 select throws_ok(
   $$ insert into public.tasks (candidate_id, type, title, due_date)

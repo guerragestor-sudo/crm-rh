@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 set local role postgres;
 set local search_path to public, extensions;
 
-select plan(19);
+select plan(21);
 
 insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000000', '11111111-0000-4000-8000-0000000000e1', 'authenticated', 'authenticated', 'e-admin@test.local', '{"full_name":"E Admin"}'),
@@ -96,6 +96,10 @@ select is(
   1::bigint, 'Duplicidade por telefone não enxerga outra organização');
 
 select is(
+  (select match from public.find_candidate_duplicates(null, '5511911110002', 'jose@x.com') limit 1),
+  'phone', 'Duplicidade: telefone (bloqueia) vem antes do e-mail (aviso)');
+
+select is(
   (public.dashboard_summary('{}') -> 'totals' ->> 'active')::int, 4, 'Dashboard: ativos');
 select is(
   (public.dashboard_summary('{}') -> 'sla' ->> 'completed_count')::int, 2, 'Dashboard: integrados');
@@ -105,6 +109,15 @@ select is(
 select is(
   (select jsonb_agg(x ->> 'name' order by x ->> 'name') from jsonb_array_elements(public.sla_breakdown('{}', 'region')) x),
   '["Centro", "Osasco"]'::jsonb, 'SLA agrupado por região');
+
+-- Telefone pendente: candidato sem telefone aparece no filtro missing_phone
+-- (inserido por último para não alterar as contagens acima).
+insert into public.candidates (full_name, email, status_id)
+values ('Sem Telefone', 'sem.telefone@x.com', (select seletiva from ref));
+select results_eq(
+  $$ select full_name from public.filter_candidates('{"missing_phone":true}') $$,
+  $$ values ('Sem Telefone'::text) $$,
+  'Filtro telefone pendente lista só quem não tem telefone');
 
 -- Organização F não vê nada da E
 select set_config('request.jwt.claims', '{"sub":"11111111-0000-4000-8000-0000000000e2","role":"authenticated"}', true);

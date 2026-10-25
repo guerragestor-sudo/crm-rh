@@ -11,6 +11,9 @@ import { AVAILABILITY_OPTIONS, COURSE_OPTIONS, DOCUMENTATION_OPTIONS } from "./l
  * Formulário do candidato: todos os campos como string (como chegam dos inputs).
  * O MESMO schema valida no navegador e no servidor; a conversão para o formato
  * do banco fica em toCandidateWrite().
+ *
+ * Telefone e e-mail são opcionais: sem telefone, a ficha fica com "telefone
+ * pendente". Telefone (ou CPF) repetido é bloqueado no servidor.
  */
 const optionalId = z.union([z.literal(""), z.uuid({ error: "Seleção inválida." })]);
 const optionalText = (max: number) => z.string().trim().max(max, { error: `Máximo de ${max} caracteres.` });
@@ -19,46 +22,41 @@ function enumOrEmpty<const T extends readonly { value: string }[]>(options: T) {
   return z.union([z.literal(""), z.enum(options.map((option) => option.value) as [T[number]["value"], ...T[number]["value"][]])]);
 }
 
-export const candidateFormSchema = z
-  .object({
-    full_name: z
-      .string()
-      .trim()
-      .min(2, { error: "Informe o nome completo." })
-      .max(150, { error: "Máximo de 150 caracteres." }),
-    phone: z
-      .string()
-      .trim()
-      .refine((value) => value === "" || normalizePhone(value) !== null, { error: "Telefone inválido. Use DDD + número." }),
-    email: z.union([z.literal(""), z.string().trim().toLowerCase().pipe(z.email({ error: "E-mail inválido." }))]),
-    cpf: z
-      .string()
-      .trim()
-      .refine((value) => value === "" || isValidCpf(value), { error: "CPF inválido." }),
-    region_id: optionalId,
-    segment_id: optionalId,
-    availability: enumOrEmpty(AVAILABILITY_OPTIONS),
-    currently_working: z.enum(["", "yes", "no"]),
-    source_id: optionalId,
-    manager_id: optionalId,
-    status_id: z.uuid({ error: "Selecione o status." }),
-    notes: optionalText(5000),
-    interview_at: z
-      .string()
-      .refine((value) => value === "" || /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value), { error: "Data inválida." }),
-    integration_date: z.union([z.literal(""), z.iso.date({ error: "Data inválida." })]),
-    documentation_status: z.enum(DOCUMENTATION_OPTIONS.map((option) => option.value) as ["pending", "in_progress", "complete"]),
-    documentation_notes: optionalText(2000),
-    course_status: z.enum(COURSE_OPTIONS.map((option) => option.value) as ["not_started", "in_progress", "completed"]),
-    course_notes: optionalText(2000),
-    // Motivos opcionais quando status/gerente mudam na edição.
-    status_reason: optionalText(500),
-    manager_reason: optionalText(500),
-  })
-  .refine((values) => values.phone !== "" || values.email !== "", {
-    error: "Informe telefone ou e-mail.",
-    path: ["phone"],
-  });
+export const candidateFormSchema = z.object({
+  full_name: z
+    .string()
+    .trim()
+    .min(2, { error: "Informe o nome completo." })
+    .max(150, { error: "Máximo de 150 caracteres." }),
+  phone: z
+    .string()
+    .trim()
+    .refine((value) => value === "" || normalizePhone(value) !== null, { error: "Telefone inválido. Use DDD + número." }),
+  email: z.union([z.literal(""), z.string().trim().toLowerCase().pipe(z.email({ error: "E-mail inválido." }))]),
+  cpf: z
+    .string()
+    .trim()
+    .refine((value) => value === "" || isValidCpf(value), { error: "CPF inválido." }),
+  region_id: optionalId,
+  segment_id: optionalId,
+  availability: enumOrEmpty(AVAILABILITY_OPTIONS),
+  currently_working: z.enum(["", "yes", "no"]),
+  source_id: optionalId,
+  manager_id: optionalId,
+  status_id: z.uuid({ error: "Selecione o status." }),
+  notes: optionalText(5000),
+  interview_at: z
+    .string()
+    .refine((value) => value === "" || /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value), { error: "Data inválida." }),
+  integration_date: z.union([z.literal(""), z.iso.date({ error: "Data inválida." })]),
+  documentation_status: z.enum(DOCUMENTATION_OPTIONS.map((option) => option.value) as ["pending", "in_progress", "complete"]),
+  documentation_notes: optionalText(2000),
+  course_status: z.enum(COURSE_OPTIONS.map((option) => option.value) as ["not_started", "in_progress", "completed"]),
+  course_notes: optionalText(2000),
+  // Motivos opcionais quando status/gerente mudam na edição.
+  status_reason: optionalText(500),
+  manager_reason: optionalText(500),
+});
 
 export type CandidateFormValues = z.infer<typeof candidateFormSchema>;
 
