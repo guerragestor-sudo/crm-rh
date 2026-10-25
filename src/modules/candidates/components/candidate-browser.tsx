@@ -14,9 +14,11 @@ import { ExportButton } from "@/modules/exports/export-button";
 
 import { searchCandidatesAction } from "../actions";
 import { countActiveFilters, filtersToSearchParams, type CandidateFilters } from "../filters";
+import { rememberFilters } from "../saved-filters";
 import { SORT_OPTIONS, type CandidateListResult, type CandidateOptions, type SortKey } from "../types";
 import { CandidateCard } from "./candidate-card";
 import { CandidateTable } from "./candidate-table";
+import { ClearFiltersButton } from "./clear-filters-button";
 import { FilterSheet, type FilterField } from "./filter-sheet";
 
 const QUERY_STORAGE_KEY = "crm:candidates:q";
@@ -90,12 +92,14 @@ export function CandidateBrowser({
   const requestId = useRef(0);
   const firstRun = useRef(true);
 
-  // Mantém os filtros estruturados na URL (sem texto livre) sem recarregar a página.
+  // Mantém os filtros estruturados na URL (sem texto livre) sem recarregar a página
+  // e salva no cookie da tela, para voltar da ficha do candidato com o filtro.
   useEffect(() => {
     const params = filtersToSearchParams(filters);
     if (sort !== "recent") params.set("sort", sort);
     const search = params.toString();
     window.history.replaceState(null, "", search ? `?${search}` : window.location.pathname);
+    rememberFilters("candidatos", search);
   }, [filters, sort]);
 
   // Refaz a busca quando texto, filtros ou ordenação mudam (texto com debounce).
@@ -132,7 +136,15 @@ export function CandidateBrowser({
   }
 
   const hasMore = result.rows.length < result.total;
-  const filtered = Boolean(query.trim()) || countActiveFilters(filters) > 0;
+  const activeCount = countActiveFilters(filters) + (query.trim() ? 1 : 0);
+  const filtered = activeCount > 0;
+
+  /** Volta à lista normal: sem busca, sem filtros e na ordem padrão. */
+  function clearAll() {
+    setQuery("");
+    setFilters({});
+    setSort("recent");
+  }
 
   return (
     <div className="space-y-4">
@@ -174,8 +186,8 @@ export function CandidateBrowser({
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-sm text-muted-foreground" aria-live="polite">
-        <span>
+      <div className="flex min-h-5 items-center justify-between gap-2 text-sm text-muted-foreground">
+        <span aria-live="polite">
           {formatNumber(result.total)}{" "}
           {result.total === 1
             ? filtered
@@ -185,7 +197,10 @@ export function CandidateBrowser({
               ? "candidatos encontrados"
               : "candidatos"}
         </span>
-        {pending ? <Loader2 className="size-4 animate-spin" aria-label="Carregando" /> : null}
+        <div className="flex items-center gap-3">
+          {pending ? <Loader2 className="size-4 animate-spin" aria-label="Carregando" /> : null}
+          <ClearFiltersButton count={activeCount} onClear={clearAll} />
+        </div>
       </div>
 
       {result.rows.length === 0 ? (
@@ -200,13 +215,7 @@ export function CandidateBrowser({
           }
           action={
             filtered ? (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setQuery("");
-                  setFilters({});
-                }}
-              >
+              <Button variant="outline" onClick={clearAll}>
                 Limpar busca e filtros
               </Button>
             ) : null

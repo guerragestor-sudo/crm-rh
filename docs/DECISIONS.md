@@ -16,6 +16,7 @@ Registro curto das decisões vigentes. Data de referência: 08/10/2026.
 | P8 | Tarefas têm data livre (sem cadência). Não são excluídas: são canceladas. |
 | P9 | Diretores e gerentes não têm login no MVP. Uso próprio do recrutador (Admin). |
 | P10 | **Cavaplay** e **Curso pago pela Cava** (25/10/2026): campos sim/não (padrão: não) na etapa "Cadastro e curso", com filtro sim/não em lista, Kanban, dashboard, SLA e relatórios, e colunas na exportação. Os candidatos importados da planilha tiveram esse texto convertido em campo. |
+| P11 | **Filtro salvo** (25/10/2026): em Candidatos e no Kanban, filtros e ordenação ficam num cookie por 12 horas (renovado a cada uso). Abrir um candidato e voltar mantém o filtro. Link com filtro explícito vence o salvo. "Limpar filtros" (abaixo do botão Filtros) e sair do app apagam. O texto da busca nunca vai para o cookie. |
 
 ## Arquitetura e segurança
 

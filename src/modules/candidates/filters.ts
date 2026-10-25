@@ -100,6 +100,33 @@ export function filtersToSearchParams(filters: CandidateFilters): URLSearchParam
   return params;
 }
 
+/** Chaves de filtro e ordenação que podem vir na URL. */
+const PARAM_KEYS = [...LIST_KEYS, ...DATE_KEYS, ...FLAG_KEYS, ...ENUM_KEYS, "sort"] as const;
+
+/** A URL já traz algum filtro ou ordenação? */
+export function hasFilterParams(params: SearchParamsInput): boolean {
+  return PARAM_KEYS.some((key) => Boolean(readParam(params, key)));
+}
+
+/**
+ * Filtro salvo (cookie da tela) só vale quando a URL não traz filtro nenhum:
+ * link com filtro explícito sempre vence. Valores inválidos são descartados
+ * depois, em filtersFromSearchParams.
+ */
+export function withSavedParams(
+  params: Record<string, string | string[] | undefined>,
+  saved: string | undefined,
+): Record<string, string | string[] | undefined> {
+  if (!saved || hasFilterParams(params)) return params;
+  let text = saved;
+  try {
+    if (text.includes("%")) text = decodeURIComponent(text);
+  } catch {
+    return params;
+  }
+  return { ...params, ...Object.fromEntries(new URLSearchParams(text)) };
+}
+
 /** Busca por telefone/CPF formatados: sem letras, compara só os dígitos. */
 export function normalizeSearchText(q: string | undefined): string | undefined {
   const value = q?.trim();

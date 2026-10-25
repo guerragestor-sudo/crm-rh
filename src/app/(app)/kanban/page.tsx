@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { PageContainer, PageHeader } from "@/components/shared/page-header";
 import { filtersFromSearchParams } from "@/modules/candidates/filters";
 import { getCandidateOptions } from "@/modules/candidates/queries";
+import { searchParamsWithSaved } from "@/modules/candidates/saved-filters.server";
 import { KanbanBoard } from "@/modules/kanban/components/kanban-board";
 import { getKanbanCandidates, KANBAN_LIMIT } from "@/modules/kanban/queries";
 import { requireMember } from "@/server/auth/session";
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Kanban" };
 
 export default async function KanbanPage({ searchParams }: PageProps<"/kanban">) {
   await requireMember();
-  const params = await searchParams;
+  const params = await searchParamsWithSaved("kanban", await searchParams);
   // O quadro já agrupa por status: filtro de status não se aplica aqui.
   const { status_ids: _ignored, ...filters } = filtersFromSearchParams(params);
   void _ignored;

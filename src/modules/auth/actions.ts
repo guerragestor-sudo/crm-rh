@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { loginSchema, safeNextPath } from "@/modules/auth/schema";
+import { forgetSavedFilters } from "@/modules/candidates/saved-filters.server";
 import { logger } from "@/server/logger";
 import { createClient } from "@/server/supabase/server";
 
@@ -38,5 +39,6 @@ export async function signOut(): Promise<void> {
   const supabase = await createClient();
   // Encerra só a sessão deste aparelho (sair no computador não desloga o celular).
   await supabase.auth.signOut({ scope: "local" });
+  await forgetSavedFilters();
   redirect("/login");
 }

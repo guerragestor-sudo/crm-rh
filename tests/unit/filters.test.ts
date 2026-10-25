@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   filtersFromSearchParams,
   filtersToSearchParams,
+  hasFilterParams,
   normalizeSearchText,
   toRpcFilters,
+  withSavedParams,
 } from "@/modules/candidates/filters";
 
 const A = "4e5d6f76-44d2-4056-8ff8-ad810d5f5028";
@@ -51,5 +53,39 @@ describe("filtros de candidatos", () => {
 
   it("monta o payload da RPC sem chaves vazias", () => {
     expect(toRpcFilters({ q: "  ", status_ids: [], archived: false, region_ids: [A] })).toEqual({ region_ids: [A] });
+  });
+
+  it("filtro salvo só vale quando a URL não traz filtro", () => {
+    const saved = filtersToSearchParams({ region_ids: [A], cavaplay: "yes" });
+    saved.set("sort", "oldest");
+    const savedText = saved.toString();
+
+    // Voltou pelo menu: URL vazia → usa o salvo (com ordenação).
+    const restored = withSavedParams({}, savedText);
+    expect(filtersFromSearchParams(restored)).toEqual({ region_ids: [A], cavaplay: "yes" });
+    expect(restored.sort).toBe("oldest");
+
+    // Cookie codificado (como o navegador grava) também funciona.
+    expect(filtersFromSearchParams(withSavedParams({}, encodeURIComponent(savedText)))).toEqual({
+      region_ids: [A],
+      cavaplay: "yes",
+    });
+
+    // Link com filtro explícito vence o salvo.
+    expect(withSavedParams({ missing_phone: "1" }, savedText)).toEqual({ missing_phone: "1" });
+    expect(withSavedParams({ sort: "name" }, savedText)).toEqual({ sort: "name" });
+    expect(withSavedParams({}, undefined)).toEqual({});
+  });
+
+  it("filtro salvo adulterado é descartado", () => {
+    expect(filtersFromSearchParams(withSavedParams({}, "region_ids=nao-e-uuid&cavaplay=talvez"))).toEqual({});
+    expect(withSavedParams({}, "%E0%A4%A")).toEqual({});
+  });
+
+  it("detecta se a URL já tem filtro ou ordenação", () => {
+    expect(hasFilterParams({})).toBe(false);
+    expect(hasFilterParams({ q: "maria" })).toBe(false);
+    expect(hasFilterParams({ status_ids: B })).toBe(true);
+    expect(hasFilterParams(new URLSearchParams("course_paid_by_cava=no"))).toBe(true);
   });
 });

@@ -8,6 +8,7 @@ import { can } from "@/lib/permissions";
 import { CandidateBrowser } from "@/modules/candidates/components/candidate-browser";
 import { filtersFromSearchParams } from "@/modules/candidates/filters";
 import { getCandidateOptions, listCandidates } from "@/modules/candidates/queries";
+import { searchParamsWithSaved } from "@/modules/candidates/saved-filters.server";
 import { SORT_OPTIONS, type SortKey } from "@/modules/candidates/types";
 import { requireMember } from "@/server/auth/session";
 import { getAppContext } from "@/server/context";
@@ -16,7 +17,8 @@ export const metadata: Metadata = { title: "Candidatos" };
 
 export default async function CandidatesPage({ searchParams }: PageProps<"/candidatos">) {
   const member = await requireMember();
-  const params = await searchParams;
+  // Sem filtro na URL (ex.: voltou da ficha pelo menu), usa o filtro salvo da tela.
+  const params = await searchParamsWithSaved("candidatos", await searchParams);
   const filters = filtersFromSearchParams(params);
   const sortParam = typeof params.sort === "string" ? params.sort : "recent";
   const sort = (SORT_OPTIONS.some((option) => option.value === sortParam) ? sortParam : "recent") as SortKey;

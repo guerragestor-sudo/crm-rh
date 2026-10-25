@@ -29,9 +29,17 @@ test.describe("Autenticação e proteção de rotas", () => {
     await page.getByRole("button", { name: "Entrar" }).click();
     await expect(page).toHaveURL(/\/agenda$/);
 
+    // Um filtro salvo na lista é apagado ao sair (aparelho compartilhado).
+    await page.goto("/candidatos?missing_phone=1");
+    await expect(page.getByRole("button", { name: "Limpar filtros (1)" })).toBeVisible();
+    const savedFilter = async () =>
+      (await page.context().cookies()).some((cookie) => cookie.name === "crm_filtros_candidatos");
+    expect(await savedFilter()).toBe(true);
+
     await page.getByRole("button", { name: "Menu do usuário" }).first().click();
     await page.getByRole("menuitem", { name: "Sair" }).click();
     await expect(page).toHaveURL(/\/login$/);
+    expect(await savedFilter()).toBe(false);
 
     await page.goto("/inicio");
     await expect(page).toHaveURL(/\/login/);

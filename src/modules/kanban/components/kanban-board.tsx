@@ -14,7 +14,7 @@ import {
 } from "@dnd-kit/core";
 import { ArrowRightLeft, Columns3 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useId, useMemo, useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/shared/empty-state";
@@ -31,8 +31,10 @@ import { formatNumber } from "@/lib/format";
 import { statusDotClass } from "@/lib/status-colors";
 import { cn } from "@/lib/utils";
 import { changeStatusAction } from "@/modules/candidates/actions";
+import { ClearFiltersButton } from "@/modules/candidates/components/clear-filters-button";
 import { FilterSheet } from "@/modules/candidates/components/filter-sheet";
-import { filtersToSearchParams, type CandidateFilters } from "@/modules/candidates/filters";
+import { countActiveFilters, filtersToSearchParams, type CandidateFilters } from "@/modules/candidates/filters";
+import { rememberFilters } from "@/modules/candidates/saved-filters";
 import type { CandidateListRow, CandidateOptions, StatusOption } from "@/modules/candidates/types";
 
 import { KanbanCard } from "./kanban-card";
@@ -195,9 +197,28 @@ export function KanbanBoard({ rows: initialRows, total, limit, options, filters,
     if (event.over) move(String(event.active.id), String(event.over.id));
   }
 
+  // Salva o filtro da tela (voltar da ficha mantém o filtro) e o mostra na URL,
+  // também quando ele veio do cookie.
+  useEffect(() => {
+    const search = filtersToSearchParams(filters).toString();
+    rememberFilters("kanban", search);
+    if (window.location.search.slice(1) !== search) {
+      window.history.replaceState(null, "", search ? `?${search}` : window.location.pathname);
+    }
+  }, [filters]);
+
   function applyFilters(next: CandidateFilters) {
     const params = filtersToSearchParams(next).toString();
-    router.push(params ? `/kanban?${params}` : "/kanban");
+    // Antes de navegar: sem isso, "limpar" voltaria com o filtro salvo.
+    rememberFilters("kanban", params);
+    if (params) {
+      router.push(`/kanban?${params}`);
+      return;
+    }
+    // "/kanban" pode estar no cache de navegação com o filtro que veio do cookie
+    // (primeira carga): busca de novo no servidor em vez de reaproveitar.
+    window.history.replaceState(null, "", "/kanban");
+    router.refresh();
   }
 
   const activeCandidate = activeId ? rows.find((row) => row.id === activeId) : null;
@@ -210,12 +231,15 @@ export function KanbanBoard({ rows: initialRows, total, limit, options, filters,
           {formatNumber(total)} {total === 1 ? "candidato" : "candidatos"}
           {total > limit ? ` (exibindo ${formatNumber(limit)}; use os filtros para refinar)` : ""}
         </p>
-        <FilterSheet
-          value={filters}
-          onApply={applyFilters}
-          options={options}
-          fields={["region", "manager", "source", "segment", "created", "integration", "tasks", "cava"]}
-        />
+        <div className="flex flex-col items-end gap-1.5">
+          <FilterSheet
+            value={filters}
+            onApply={applyFilters}
+            options={options}
+            fields={["region", "manager", "source", "segment", "created", "integration", "tasks", "cava"]}
+          />
+          <ClearFiltersButton count={countActiveFilters(filters)} onClear={() => applyFilters({})} />
+        </div>
       </div>
 
       {rows.length === 0 ? (
