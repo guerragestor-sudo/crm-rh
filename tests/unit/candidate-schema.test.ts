@@ -61,9 +61,27 @@ describe("toCandidateWrite", () => {
       email: "maria@exemplo.com",
       cpf: "11144477735",
       currently_working: false,
+      cavaplay: false,
+      course_paid_by_cava: false,
       region_id: null,
       interview_at: "2026-10-08T17:30:00.000Z",
     });
+  });
+});
+
+describe("campos da Cava", () => {
+  it("começam em Não e viram booleanos", () => {
+    const base = { ...emptyCandidateForm(STATUS), full_name: "Maria Silva" };
+    expect(base).toMatchObject({ cavaplay: "no", course_paid_by_cava: "no" });
+    const write = toCandidateWrite({ ...base, cavaplay: "yes", course_paid_by_cava: "no" });
+    expect(write).toMatchObject({ cavaplay: true, course_paid_by_cava: false });
+  });
+
+  it("rejeitam valores fora de sim/não", () => {
+    const values = { ...emptyCandidateForm(STATUS), full_name: "Maria Silva", cavaplay: "talvez" };
+    const result = candidateFormSchema.safeParse(values);
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0].path).toEqual(["cavaplay"]);
   });
 });
 

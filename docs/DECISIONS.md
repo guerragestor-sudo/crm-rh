@@ -15,6 +15,7 @@ Registro curto das decisões vigentes. Data de referência: 08/10/2026.
 | P7 | **Duplicidade pelo telefone** (ajuste de 24/10/2026): telefone repetido bloqueia (único por organização), porque nem todo candidato envia documentos no início. CPF, quando preenchido, também bloqueia. E-mail repetido só gera aviso. Telefone e e-mail são opcionais: sem telefone, a ficha mostra **Telefone pendente** e aparece no filtro de mesmo nome. |
 | P8 | Tarefas têm data livre (sem cadência). Não são excluídas: são canceladas. |
 | P9 | Diretores e gerentes não têm login no MVP. Uso próprio do recrutador (Admin). |
+| P10 | **Cavaplay** e **Curso pago pela Cava** (25/10/2026): campos sim/não (padrão: não) na etapa "Cadastro e curso", com filtro sim/não em lista, Kanban, dashboard, SLA e relatórios, e colunas na exportação. Os candidatos importados da planilha tiveram esse texto convertido em campo. |
 
 ## Arquitetura e segurança
 

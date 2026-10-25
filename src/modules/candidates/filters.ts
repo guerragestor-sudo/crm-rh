@@ -11,6 +11,7 @@ import type { Json } from "@/types/database";
  */
 const uuidList = z.array(z.uuid()).max(50).optional();
 const isoDate = z.iso.date().optional();
+const yesNo = z.enum(["yes", "no"]).optional();
 
 export const candidateFiltersSchema = z.object({
   q: z.string().trim().max(100).optional(),
@@ -27,6 +28,8 @@ export const candidateFiltersSchema = z.object({
   no_next_action: z.boolean().optional(),
   has_overdue_task: z.boolean().optional(),
   missing_phone: z.boolean().optional(),
+  cavaplay: yesNo,
+  course_paid_by_cava: yesNo,
   archived: z.boolean().optional(),
 });
 
@@ -35,6 +38,7 @@ export type CandidateFilters = z.infer<typeof candidateFiltersSchema>;
 const LIST_KEYS = ["status_ids", "region_ids", "source_ids", "manager_ids", "segment_ids"] as const;
 const DATE_KEYS = ["created_from", "created_to", "integration_from", "integration_to"] as const;
 const FLAG_KEYS = ["no_next_action", "has_overdue_task", "missing_phone", "archived"] as const;
+const ENUM_KEYS = ["integration", "cavaplay", "course_paid_by_cava"] as const;
 
 type SearchParamsInput = Record<string, string | string[] | undefined> | URLSearchParams;
 
@@ -58,8 +62,10 @@ export function filtersFromSearchParams(params: SearchParamsInput): CandidateFil
   for (const key of FLAG_KEYS) {
     if (readParam(params, key) === "1") raw[key] = true;
   }
-  const integration = readParam(params, "integration");
-  if (integration) raw.integration = integration;
+  for (const key of ENUM_KEYS) {
+    const value = readParam(params, key);
+    if (value) raw[key] = value;
+  }
 
   const parsed = candidateFiltersSchema.safeParse(raw);
   if (parsed.success) return parsed.data;
@@ -87,7 +93,10 @@ export function filtersToSearchParams(filters: CandidateFilters): URLSearchParam
   for (const key of FLAG_KEYS) {
     if (filters[key]) params.set(key, "1");
   }
-  if (filters.integration) params.set("integration", filters.integration);
+  for (const key of ENUM_KEYS) {
+    const value = filters[key];
+    if (value) params.set(key, value);
+  }
   return params;
 }
 
@@ -121,7 +130,7 @@ export function countActiveFilters(filters: CandidateFilters): number {
   for (const key of LIST_KEYS) if (filters[key]?.length) count++;
   if (filters.created_from || filters.created_to) count++;
   if (filters.integration_from || filters.integration_to) count++;
-  if (filters.integration) count++;
+  for (const key of ENUM_KEYS) if (filters[key]) count++;
   for (const key of FLAG_KEYS) if (filters[key]) count++;
   return count;
 }

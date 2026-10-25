@@ -19,6 +19,8 @@ describe("filtros de candidatos", () => {
       no_next_action: true,
       missing_phone: true,
       integration: "pending" as const,
+      cavaplay: "yes" as const,
+      course_paid_by_cava: "no" as const,
     };
     const params = filtersToSearchParams(filters);
     expect(filtersFromSearchParams(params)).toEqual(filters);
@@ -31,7 +33,12 @@ describe("filtros de candidatos", () => {
   });
 
   it("ignora valores inválidos vindos da URL", () => {
-    const filters = filtersFromSearchParams({ region_ids: "nao-e-uuid", created_from: "2026-13-45", status_ids: B });
+    const filters = filtersFromSearchParams({
+      region_ids: "nao-e-uuid",
+      created_from: "2026-13-45",
+      cavaplay: "talvez",
+      status_ids: B,
+    });
     expect(filters).toEqual({ status_ids: [B] });
   });
 

@@ -70,6 +70,8 @@ export type CandidateDetail = {
   documentation_notes: string | null;
   course_status: string;
   course_notes: string | null;
+  cavaplay: boolean;
+  course_paid_by_cava: boolean;
   sla_days: number;
   sla_days_frozen: number | null;
   responsible_member_id: string;

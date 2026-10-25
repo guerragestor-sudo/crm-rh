@@ -338,10 +338,6 @@ export function parseSheet(values, { tab, year, today, importDate }) {
     const documentation = mapDocumentation(cell(row, "documentation"));
     const course = mapCourse(cell(row, "course"));
 
-    const courseNotes = [course.notes];
-    if (fold(cell(row, "cavaplay")) === "sim") courseNotes.push("Cavaplay 1.200: sim");
-    if (fold(cell(row, "coursePaid")) === "sim") courseNotes.push("Curso pago pela Cava: sim");
-
     // Observação: texto original + tudo que não coube nos campos do CRM.
     const notes = [
       clean(cell(row, "notes")),
@@ -381,7 +377,9 @@ export function parseSheet(values, { tab, year, today, importDate }) {
         documentation_status: documentation.status,
         documentation_notes: documentation.notes,
         course_status: course.status,
-        course_notes: courseNotes.filter(Boolean).join("\n") || null,
+        course_notes: course.notes,
+        cavaplay: fold(cell(row, "cavaplay")) === "sim",
+        course_paid_by_cava: fold(cell(row, "coursePaid")) === "sim",
       },
     });
   });

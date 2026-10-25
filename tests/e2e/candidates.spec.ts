@@ -32,7 +32,7 @@ test.describe("Desktop: lista, filtros, edição e erros", () => {
     await page.getByLabel("E-mail").fill(`teste.${uniqueSuffix()}@exemplo.com`);
     await page.getByLabel("Região").selectOption({ label: "Centro" });
     await page.getByLabel("Origem / captação").selectOption({ label: "Indicação" });
-    await page.getByRole("radio", { name: "Sim" }).click();
+    await page.getByRole("radiogroup", { name: "Trabalha atualmente?" }).getByRole("radio", { name: "Sim" }).click();
     await page.getByRole("button", { name: "Cadastrar candidato" }).click();
     await expect(page.getByRole("heading", { name })).toBeVisible();
 
@@ -48,6 +48,45 @@ test.describe("Desktop: lista, filtros, edição e erros", () => {
     await page.getByRole("tab", { name: /Histórico/ }).click();
     await expect(page.getByText("Agendou entrevista para 01/12/2026 10:30")).toBeVisible();
     await expect(page.getByText(/Registrou integração em .* · SLA 0 dias/)).toBeVisible();
+  });
+
+  test("Cavaplay e curso pago pela Cava: sim/não na ficha, no histórico e no filtro", async ({ page }) => {
+    const name = `Teste Cava ${uniqueSuffix()}`;
+    await page.goto("/candidatos/novo");
+    await page.getByLabel("Nome completo").fill(name);
+    await expect(page.getByRole("radiogroup", { name: "Cavaplay?" }).getByRole("radio", { name: "Não" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
+    await page.getByRole("radiogroup", { name: "Cavaplay?" }).getByRole("radio", { name: "Sim" }).click();
+    await page.getByRole("button", { name: "Cadastrar candidato" }).click();
+    await expect(page.getByRole("heading", { name })).toBeVisible();
+
+    await expect(page.getByText("Cavaplay", { exact: true }).locator("..")).toContainText("Sim");
+    await expect(page.getByText("Curso pago pela Cava", { exact: true }).locator("..")).toContainText("Não");
+
+    await page.getByRole("link", { name: "Editar" }).click();
+    await page.getByRole("radiogroup", { name: "Curso pago pela Cava?" }).getByRole("radio", { name: "Sim" }).click();
+    await page.getByRole("button", { name: "Salvar alterações" }).click();
+    await expect(page.getByText("Curso pago pela Cava", { exact: true }).locator("..")).toContainText("Sim");
+    await page.getByRole("tab", { name: /Histórico/ }).click();
+    await expect(page.getByRole("tabpanel").getByText("Alterou curso pago pela Cava")).toBeVisible();
+
+    // Filtro: Cavaplay = Sim mostra o novo candidato; Não esconde.
+    await page.goto("/candidatos");
+    await page.getByRole("button", { name: /Filtros/ }).click();
+    const sheet = page.getByRole("dialog", { name: "Filtros" });
+    await sheet.getByRole("group", { name: "Cavaplay" }).getByRole("button", { name: "Sim" }).click();
+    await sheet.getByRole("button", { name: "Aplicar" }).click();
+    await expect(page).toHaveURL(/cavaplay=yes/);
+    await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
+    await expect(page.getByRole("link", { name })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Diego Almeida" })).toHaveCount(0);
+
+    await page.goto("/candidatos?cavaplay=no");
+    await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Diego Almeida" })).toBeVisible();
+    await expect(page.getByRole("link", { name })).toHaveCount(0);
   });
 
   test("integração futura é recusada pelo servidor", async ({ page }) => {

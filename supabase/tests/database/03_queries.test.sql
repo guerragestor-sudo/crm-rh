@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 set local role postgres;
 set local search_path to public, extensions;
 
-select plan(21);
+select plan(23);
 
 insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000000', '11111111-0000-4000-8000-0000000000e1', 'authenticated', 'authenticated', 'e-admin@test.local', '{"full_name":"E Admin"}'),
@@ -118,6 +118,16 @@ select results_eq(
   $$ select full_name from public.filter_candidates('{"missing_phone":true}') $$,
   $$ values ('Sem Telefone'::text) $$,
   'Filtro telefone pendente lista só quem não tem telefone');
+
+-- Campos da Cava (sim/não).
+update public.candidates set cavaplay = true, course_paid_by_cava = true where full_name = 'José Ávila';
+select results_eq(
+  $$ select full_name from public.filter_candidates('{"cavaplay":"yes"}') $$,
+  $$ values ('José Ávila'::text) $$,
+  'Filtro Cavaplay = sim');
+select is(
+  (select count(*) from public.filter_candidates('{"cavaplay":"no","course_paid_by_cava":"no"}')),
+  4::bigint, 'Filtros Cavaplay = não e curso pago pela Cava = não combinados');
 
 -- Organização F não vê nada da E
 select set_config('request.jwt.claims', '{"sub":"11111111-0000-4000-8000-0000000000e2","role":"authenticated"}', true);

@@ -15,13 +15,14 @@ import { createClient } from "@/server/supabase/server";
 const PAGE = 1000;
 const MAX_ROWS = 20000;
 const SELECT = `full_name, phone, email, cpf, availability, currently_working, notes, interview_at, integration_date,
-  documentation_status, course_status, created_at, sla_days,
+  documentation_status, course_status, cavaplay, course_paid_by_cava, created_at, sla_days,
   status:candidate_statuses(name), region:regions(name), segment:segments(name), source:sources(name), manager:managers(name)`;
 
 type Row = {
   full_name: string; phone: string | null; email: string | null; cpf: string | null; availability: string | null;
   currently_working: boolean | null; notes: string | null; interview_at: string | null; integration_date: string | null;
-  documentation_status: string; course_status: string; created_at: string; sla_days: number;
+  documentation_status: string; course_status: string; cavaplay: boolean; course_paid_by_cava: boolean;
+  created_at: string; sla_days: number;
   status: { name: string } | null; region: { name: string } | null; segment: { name: string } | null;
   source: { name: string } | null; manager: { name: string } | null;
 };
@@ -51,14 +52,16 @@ export async function POST(request: NextRequest) {
 
     const csv = toCsv(
       ["Nome", "Telefone", "E-mail", "CPF", "Região", "Ramo", "Disponibilidade", "Trabalha atualmente", "Origem",
-        "Gerente", "Status", "Entrevista", "Integração", "SLA (dias)", "Documentação", "Curso", "Observação", "Cadastro"],
+        "Gerente", "Status", "Entrevista", "Integração", "SLA (dias)", "Documentação", "Curso", "Cavaplay",
+        "Curso pago pela Cava", "Observação", "Cadastro"],
       rows.map((row) => [
         row.full_name, formatPhone(row.phone), row.email, row.cpf ? formatCpf(row.cpf) : "", row.region?.name,
         row.segment?.name, row.availability ? AVAILABILITY_LABELS[row.availability] : "",
         row.currently_working === null ? "" : row.currently_working ? "Sim" : "Não", row.source?.name,
         row.manager?.name, row.status?.name, formatDateTime(row.interview_at, context.timezone),
         formatDate(row.integration_date), row.sla_days, DOCUMENTATION_LABELS[row.documentation_status],
-        COURSE_LABELS[row.course_status], row.notes, formatDateTime(row.created_at, context.timezone),
+        COURSE_LABELS[row.course_status], row.cavaplay ? "Sim" : "Não", row.course_paid_by_cava ? "Sim" : "Não",
+        row.notes, formatDateTime(row.created_at, context.timezone),
       ]),
     );
 

@@ -60,6 +60,8 @@ export function CandidateDetails({
       </Group>
       <Group title="Curso">
         <Item label="Situação">{COURSE_LABELS[candidate.course_status]}</Item>
+        <Item label="Cavaplay">{candidate.cavaplay ? "Sim" : "Não"}</Item>
+        <Item label="Curso pago pela Cava">{candidate.course_paid_by_cava ? "Sim" : "Não"}</Item>
         <Item label="Informações" wide>
             {candidate.course_notes ? <span className="whitespace-pre-line">{candidate.course_notes}</span> : null}
         </Item>

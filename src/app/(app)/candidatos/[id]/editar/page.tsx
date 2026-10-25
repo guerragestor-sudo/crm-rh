@@ -40,6 +40,8 @@ export default async function EditCandidatePage({ params }: PageProps<"/candidat
     documentation_notes: candidate.documentation_notes ?? "",
     course_status: candidate.course_status as CandidateFormValues["course_status"],
     course_notes: candidate.course_notes ?? "",
+    cavaplay: candidate.cavaplay ? "yes" : "no",
+    course_paid_by_cava: candidate.course_paid_by_cava ? "yes" : "no",
     status_reason: "",
     manager_reason: "",
   };

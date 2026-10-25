@@ -50,6 +50,8 @@ export const FIELD_LABELS: Record<string, string> = {
   documentation_notes: "Observações de documentação",
   course_status: "Curso",
   course_notes: "Observações do curso",
+  cavaplay: "Cavaplay",
+  course_paid_by_cava: "Curso pago pela Cava",
   task: "Tarefa",
   document: "Documento",
 };
@@ -65,6 +67,8 @@ export function historyValueLabel(field: string | null, value: string | null): s
     case "course_status":
       return COURSE_LABELS[value] ?? value;
     case "currently_working":
+    case "cavaplay":
+    case "course_paid_by_cava":
       return value === "true" ? "Sim" : value === "false" ? "Não" : value;
     default:
       return value;

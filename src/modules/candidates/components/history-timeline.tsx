@@ -83,10 +83,15 @@ function render(entry: HistoryEntry): Rendered {
       return {
         icon: Pencil,
         tone: "text-muted-foreground",
-        title: `Alterou ${field.toLowerCase()}`,
+        title: `Alterou ${inSentence(field)}`,
         change: { from, to },
       };
   }
+}
+
+/** "Curso pago pela Cava" → "curso pago pela Cava"; siglas ("CPF") ficam como estão. */
+function inSentence(label: string) {
+  return /^[A-Z]{2}/.test(label) ? label : label.charAt(0).toLowerCase() + label.slice(1);
 }
 
 export function HistoryTimeline({ entries, timezone }: { entries: HistoryEntry[]; timezone: string }) {

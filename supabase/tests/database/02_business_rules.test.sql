@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 set local role postgres;
 set local search_path to public, extensions;
 
-select plan(18);
+select plan(19);
 
 insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000000', '11111111-0000-4000-8000-0000000000d1', 'authenticated', 'authenticated', 'd-admin@test.local', '{"full_name":"D Admin"}');
@@ -70,6 +70,13 @@ select ok(
   exists (select 1 from public.candidate_history
           where candidate_id = '55555555-0000-4000-8000-0000000000d1' and action = 'updated' and field = 'notes'),
   'Edição de observação registrada no histórico');
+
+update public.candidates set cavaplay = true where id = '55555555-0000-4000-8000-0000000000d1';
+select ok(
+  exists (select 1 from public.candidate_history
+          where candidate_id = '55555555-0000-4000-8000-0000000000d1' and action = 'updated'
+            and field = 'cavaplay' and old_value = 'false' and new_value = 'true'),
+  'Cavaplay: usuária altera e a mudança vai para o histórico');
 
 -- Limpar a integração limpa o SLA congelado.
 update public.candidates set integration_date = null where id = '55555555-0000-4000-8000-0000000000d1';

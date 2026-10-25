@@ -244,6 +244,8 @@ push(
   `| Não entram (ver "Bloqueados") | ${blocked.length} |`,
   `| Entram sem telefone (telefone pendente) | ${importable.filter((r) => !r.candidate.phone).length} |`,
   `| Com data de integração (SLA congelado) | ${importable.filter((r) => r.candidate.integration_date).length} |`,
+  `| Cavaplay | ${importable.filter((r) => r.candidate.cavaplay).length} |`,
+  `| Curso pago pela Cava | ${importable.filter((r) => r.candidate.course_paid_by_cava).length} |`,
   "",
 );
 
@@ -417,6 +419,8 @@ const payload = importable.map((record) => {
     documentation_notes: c.documentation_notes,
     course_status: c.course_status,
     course_notes: c.course_notes,
+    cavaplay: c.cavaplay,
+    course_paid_by_cava: c.course_paid_by_cava,
     responsible_member_id: member.id,
     created_by_member_id: member.id,
     created_at: dayToIso(c.created_date, timezone),

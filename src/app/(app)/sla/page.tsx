@@ -45,7 +45,7 @@ export default async function SlaPage({ searchParams }: PageProps<"/sla">) {
           <UrlFilters
             value={filters}
             options={options}
-            fields={["status", "region", "manager", "source", "segment", "created", "integration_period"]}
+            fields={["status", "region", "manager", "source", "segment", "created", "integration_period", "cava"]}
             preserve={["agrupar"]}
           />
         }

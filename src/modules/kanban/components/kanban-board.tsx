@@ -214,7 +214,7 @@ export function KanbanBoard({ rows: initialRows, total, limit, options, filters,
           value={filters}
           onApply={applyFilters}
           options={options}
-          fields={["region", "manager", "source", "segment", "created", "integration", "tasks"]}
+          fields={["region", "manager", "source", "segment", "created", "integration", "tasks", "cava"]}
         />
       </div>
 

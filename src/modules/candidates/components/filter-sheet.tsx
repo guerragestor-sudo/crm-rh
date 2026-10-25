@@ -33,6 +33,7 @@ export type FilterField =
   | "integration"
   | "integration_period"
   | "tasks"
+  | "cava"
   | "archived";
 
 const DEFAULT_FIELDS: FilterField[] = [
@@ -44,6 +45,7 @@ const DEFAULT_FIELDS: FilterField[] = [
   "created",
   "integration",
   "tasks",
+  "cava",
 ];
 
 function ChipGroup({
@@ -101,6 +103,23 @@ function ToggleChip({ active, onClick, children }: { active: boolean; onClick: (
     >
       {children}
     </button>
+  );
+}
+
+type YesNo = "yes" | "no" | undefined;
+
+/** Filtro sim/não: tocar de novo na opção ativa limpa o filtro. */
+function YesNoFilter({ label, value, onChange }: { label: string; value: YesNo; onChange: (value: YesNo) => void }) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap items-center gap-2">
+      <span className="w-full text-sm text-muted-foreground sm:w-44">{label}</span>
+      <ToggleChip active={value === "yes"} onClick={() => onChange(value === "yes" ? undefined : "yes")}>
+        Sim
+      </ToggleChip>
+      <ToggleChip active={value === "no"} onClick={() => onChange(value === "no" ? undefined : "no")}>
+        Não
+      </ToggleChip>
+    </div>
   );
 }
 
@@ -304,6 +323,17 @@ export function FilterSheet({
                   Telefone pendente
                 </ToggleChip>
               </div>
+            </fieldset>
+          ) : null}
+          {has("cava") ? (
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium">Cava</legend>
+              <YesNoFilter label="Cavaplay" value={draft.cavaplay} onChange={(value) => setField("cavaplay", value)} />
+              <YesNoFilter
+                label="Curso pago pela Cava"
+                value={draft.course_paid_by_cava}
+                onChange={(value) => setField("course_paid_by_cava", value)}
+              />
             </fieldset>
           ) : null}
           {has("archived") ? (

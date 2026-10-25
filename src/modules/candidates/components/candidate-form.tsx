@@ -29,6 +29,17 @@ const WORKING_OPTIONS = [
   { value: "no", label: "Não" },
 ] as const;
 
+const YES_NO_OPTIONS = [
+  { value: "no", label: "Não" },
+  { value: "yes", label: "Sim" },
+] as const;
+
+/** Campos sim/não da Cava (etapa "Cadastro e curso"). */
+const CAVA_FIELDS = [
+  { name: "cavaplay", label: "Cavaplay?" },
+  { name: "course_paid_by_cava", label: "Curso pago pela Cava?" },
+] as const;
+
 function selectable<T extends Option>(items: T[], current: string) {
   return items.filter((item) => item.is_active || item.id === current);
 }
@@ -419,6 +430,24 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
           <FormField id="course_notes" label="Informações do curso" error={fieldError("course_notes")}>
             <Textarea id="course_notes" rows={3} className="text-base md:text-sm" {...reg("course_notes")} />
           </FormField>
+          {CAVA_FIELDS.map((cava) => (
+            <div key={cava.name} className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium">{cava.label}</span>
+              <Controller
+                control={control}
+                name={cava.name}
+                render={({ field }) => (
+                  <Segmented
+                    name={cava.name}
+                    ariaLabel={cava.label}
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={YES_NO_OPTIONS}
+                  />
+                )}
+              />
+            </div>
+          ))}
         </div>
       </section>
 

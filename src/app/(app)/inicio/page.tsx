@@ -56,7 +56,7 @@ export default async function HomePage({ searchParams }: PageProps<"/inicio">) {
             <UrlFilters
               value={filters}
               options={options}
-              fields={["status", "region", "manager", "source", "segment", "created"]}
+              fields={["status", "region", "manager", "source", "segment", "created", "cava"]}
             />
             <Button asChild className="hidden h-10 sm:inline-flex">
               <Link href="/candidatos/novo">

@@ -53,6 +53,8 @@ export const candidateFormSchema = z.object({
   documentation_notes: optionalText(2000),
   course_status: z.enum(COURSE_OPTIONS.map((option) => option.value) as ["not_started", "in_progress", "completed"]),
   course_notes: optionalText(2000),
+  cavaplay: z.enum(["no", "yes"]),
+  course_paid_by_cava: z.enum(["no", "yes"]),
   // Motivos opcionais quando status/gerente mudam na edição.
   status_reason: optionalText(500),
   manager_reason: optionalText(500),
@@ -79,6 +81,8 @@ export const emptyCandidateForm = (statusId = ""): CandidateFormValues => ({
   documentation_notes: "",
   course_status: "not_started",
   course_notes: "",
+  cavaplay: "no",
+  course_paid_by_cava: "no",
   status_reason: "",
   manager_reason: "",
 });
@@ -90,7 +94,7 @@ export const FORM_STEPS = [
   { title: "Processo", fields: ["status_id", "manager_id", "interview_at", "integration_date", "notes"] },
   {
     title: "Cadastro e curso",
-    fields: ["documentation_status", "documentation_notes", "course_status", "course_notes"],
+    fields: ["documentation_status", "documentation_notes", "course_status", "course_notes", "cavaplay", "course_paid_by_cava"],
   },
 ] as const satisfies readonly { title: string; fields: readonly (keyof CandidateFormValues)[] }[];
 
@@ -132,6 +136,8 @@ export function toCandidateWrite(values: CandidateFormValues, timeZone = DEFAULT
     documentation_notes: emptyToNull(values.documentation_notes.trim()),
     course_status: values.course_status,
     course_notes: emptyToNull(values.course_notes.trim()),
+    cavaplay: values.cavaplay === "yes",
+    course_paid_by_cava: values.course_paid_by_cava === "yes",
   };
 }
 

@@ -92,8 +92,8 @@ export async function getCandidate(id: string): Promise<CandidateDetail | null> 
     .select(
       `id, full_name, phone, email, cpf, region_id, segment_id, availability, currently_working, source_id,
        manager_id, notes, status_id, status_changed_at, interview_at, integration_date, documentation_status,
-       documentation_notes, course_status, course_notes, sla_days, sla_days_frozen, responsible_member_id,
-       archived_at, created_at, updated_at,
+       documentation_notes, course_status, course_notes, cavaplay, course_paid_by_cava, sla_days, sla_days_frozen,
+       responsible_member_id, archived_at, created_at, updated_at,
        status:candidate_statuses(id, name, color),
        region:regions(name),
        segment:segments(name),

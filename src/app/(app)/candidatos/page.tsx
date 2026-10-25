@@ -28,8 +28,8 @@ export default async function CandidatesPage({ searchParams }: PageProps<"/candi
   ]);
 
   const filterFields = can(member.role, "candidates.archive")
-    ? (["status", "region", "manager", "source", "segment", "created", "integration", "tasks", "archived"] as const)
-    : (["status", "region", "manager", "source", "segment", "created", "integration", "tasks"] as const);
+    ? (["status", "region", "manager", "source", "segment", "created", "integration", "tasks", "cava", "archived"] as const)
+    : (["status", "region", "manager", "source", "segment", "created", "integration", "tasks", "cava"] as const);
 
   return (
     <PageContainer>

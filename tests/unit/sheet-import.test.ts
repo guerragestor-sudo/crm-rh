@@ -154,7 +154,9 @@ describe("parseSheet", () => {
       integration_date: "2026-09-29",
       documentation_status: "complete",
       course_status: "completed",
-      course_notes: "Curso pago pela Cava: sim",
+      course_notes: null,
+      cavaplay: false,
+      course_paid_by_cava: true,
     });
     expect(record.candidate.notes.split("\n")).toEqual([
       "mora em guarulhos",

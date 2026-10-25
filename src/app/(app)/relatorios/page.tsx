@@ -48,6 +48,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/relatori
                 "integration_period",
                 "integration",
                 "tasks",
+                "cava",
               ]}
             />
             {can(member.role, "candidates.export") ? <ExportButton filters={filters} total={totals.active} /> : null}
