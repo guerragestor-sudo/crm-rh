@@ -10,7 +10,7 @@ Registro curto das decisões vigentes. Data de referência: 08/10/2026.
 | P2 | Candidato **ativo** = não arquivado (`archived_at is null`), independente do status. |
 | P3 | **Atrasadas** e **Sem próxima ação** são grupos separados (ajuste de 09/10/2026). Atrasada = candidato com tarefa `pending` cujo prazo já passou. Sem próxima ação = candidato ativo **sem nenhuma** tarefa `pending`. Quem tem tarefa atrasada aparece só em "Atrasadas". |
 | P4 | **SLA** em dias civis no fuso da organização. Concluído: `integration_date − data local de created_at`. Em andamento: `hoje − data local de created_at`. Ao preencher a integração, o valor é **congelado** em `sla_days_frozen`; corrigir a data recalcula e registra no histórico. |
-| P5 | `integration_date` não pode ser futura nem anterior à data de cadastro (o SLA perderia sentido). |
+| P5 | `integration_date` é o dia em que o candidato **começou**: não pode ser futura nem anterior à data de cadastro (o SLA perderia sentido). Data combinada com antecedência vai em **Integração prevista** (P13). |
 | P6 | `manager_id` = gerente para quem o candidato será direcionado. Após o cadastro, gerente e status só mudam pelas RPCs `change_candidate_manager` / `change_candidate_status`, que registram anterior, novo, autor, data/hora e motivo. |
 | P7 | **Duplicidade pelo telefone** (ajuste de 24/10/2026): telefone repetido bloqueia (único por organização), porque nem todo candidato envia documentos no início. CPF, quando preenchido, também bloqueia. E-mail repetido só gera aviso. Telefone e e-mail são opcionais: sem telefone, a ficha mostra **Telefone pendente** e aparece no filtro de mesmo nome. |
 | P8 | Tarefas têm data livre (sem cadência). Não são excluídas: são canceladas. |
@@ -18,6 +18,7 @@ Registro curto das decisões vigentes. Data de referência: 08/10/2026.
 | P10 | **Cavaplay** e **Curso pago pela Cava** (25/10/2026): campos sim/não (padrão: não) na etapa "Cadastro e curso", com filtro sim/não em lista, Kanban, dashboard, SLA e relatórios, e colunas na exportação. Os candidatos importados da planilha tiveram esse texto convertido em campo. |
 | P11 | **Filtro salvo** (25/10/2026): em Candidatos e no Kanban, filtros e ordenação ficam num cookie por 12 horas (renovado a cada uso). Abrir um candidato e voltar mantém o filtro. Link com filtro explícito vence o salvo. "Limpar filtros" (abaixo do botão Filtros) e sair do app apagam. O texto da busca nunca vai para o cookie. |
 | P12 | **Relatório em PDF** (26/10/2026): em Relatórios, "Exportar PDF" gera no navegador um relatório com os filtros aplicados: indicadores, SLA, status, gerente, região, origem e evolução mensal. Só dados agregados, sem dados pessoais. Mesma permissão da exportação CSV e registro na auditoria (data_export, formato pdf). |
+| P13 | **Integração prevista** (26/10/2026): `integration_planned_date` aceita data futura, não entra no SLA nem nos integrados. Formulário barra integração futura no próprio campo e oferece "Mover para integração prevista". Ficha e Agenda ("Integrações para confirmar", previstas para hoje ou antes) têm "Confirmar integração": a usuária informa o dia em que o candidato começou, o SLA congela e a prevista é limpa (trigger). Selo nos cartões, filtro e coluna no CSV. |
 
 ## Arquitetura e segurança
 

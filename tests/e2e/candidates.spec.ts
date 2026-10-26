@@ -89,14 +89,68 @@ test.describe("Desktop: lista, filtros, edição e erros", () => {
     await expect(page.getByRole("link", { name })).toHaveCount(0);
   });
 
-  test("integração futura é recusada pelo servidor", async ({ page }) => {
+  test("integração prevista: data futura vira prevista, aparece na Agenda e é confirmada", async ({ page }) => {
+    const name = `Teste Prevista ${uniqueSuffix()}`;
+    const br = (iso: string) => iso.split("-").reverse().join("/");
+    await page.goto("/candidatos/novo");
+    const today = (await page.getByLabel("Data de integração").getAttribute("max"))!;
+    const tomorrow = new Date(`${today}T12:00:00Z`);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    const tomorrowIso = tomorrow.toISOString().slice(0, 10);
+
+    // Data futura na integração: aviso no campo, sem ir ao servidor, e atalho para a prevista.
+    await page.getByLabel("Nome completo").fill(name);
+    await page.getByLabel("Data de integração").fill(tomorrowIso);
+    await page.getByRole("button", { name: "Cadastrar candidato" }).click();
+    await expect(page.getByText(/Data futura: use “Integração prevista”/)).toBeVisible();
+    await expect(page).toHaveURL(/\/candidatos\/novo$/);
+    await page.getByRole("button", { name: "Mover para integração prevista" }).click();
+    await expect(page.getByLabel("Integração prevista")).toHaveValue(tomorrowIso);
+    await expect(page.getByLabel("Data de integração")).toHaveValue("");
+    await page.getByRole("button", { name: "Cadastrar candidato" }).click();
+
+    await expect(page.getByRole("heading", { name })).toBeVisible();
+    const detailUrl = page.url();
+    await expect(page.getByText(`Prevista ${br(tomorrowIso)}`)).toBeVisible();
+    await page.goto("/candidatos?integration=planned");
+    await expect(page.getByRole("link", { name }).first()).toBeVisible();
+
+    // Combinada para hoje: aparece na Agenda para confirmar.
+    await page.getByRole("link", { name }).first().click();
+    await page.getByRole("link", { name: "Editar" }).click();
+    await page.getByLabel("Integração prevista").fill(today);
+    await page.getByRole("button", { name: "Salvar alterações" }).click();
+    await expect(page.getByText(`Prevista ${br(today)}`)).toBeVisible();
+
+    await page.goto("/agenda");
+    const block = page.getByRole("region", { name: /Integrações para confirmar/ });
+    await expect(block.getByRole("link", { name })).toBeVisible();
+    await block.getByRole("button", { name: `Confirmar integração de ${name}` }).click();
+    const dialog = page.getByRole("dialog", { name: "Confirmar integração" });
+    await expect(dialog.getByLabel("Dia em que começou")).toHaveValue(today);
+    await dialog.getByRole("button", { name: "Confirmar integração" }).click();
+    await expect(page.getByText(`Integração de ${name} confirmada em ${br(today)}.`)).toBeVisible();
+    await expect(page.getByRole("link", { name })).toHaveCount(0);
+
+    // Na ficha: integração registrada, SLA congelado, prevista some; histórico com as duas etapas.
+    await page.goto(detailUrl);
+    await expect(page.getByText("SLA (concluído)")).toBeVisible();
+    await expect(page.getByText(/^Prevista /)).toHaveCount(0);
+    await page.getByRole("tab", { name: /Histórico/ }).click();
+    await expect(page.getByRole("tabpanel").getByText("Alterou integração prevista").first()).toBeVisible();
+    await expect(page.getByRole("tabpanel").getByText(/Registrou integração em/)).toBeVisible();
+  });
+
+  test("integração futura é barrada no próprio campo (o banco também barra)", async ({ page }) => {
     await page.goto("/candidatos");
     await page.getByRole("link", { name: "Diego Almeida" }).click();
     await page.getByRole("link", { name: "Editar" }).click();
     await page.getByLabel("Data de integração").evaluate((input: HTMLInputElement) => input.removeAttribute("max"));
     await page.getByLabel("Data de integração").fill("2099-01-01");
     await page.getByRole("button", { name: "Salvar alterações" }).click();
-    await expect(page.getByText("A data de integração não pode ser futura")).toBeVisible();
+    await expect(page.getByText(/Data futura: use “Integração prevista”/)).toBeVisible();
+    await expect(page.getByLabel("Data de integração")).toHaveAttribute("aria-invalid", "true");
+    await expect(page).toHaveURL(/\/editar$/);
   });
 
   test("candidato inexistente mostra página de não encontrado", async ({ page }) => {

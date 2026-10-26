@@ -297,6 +297,12 @@ export function FilterSheet({
                 >
                   Integrados
                 </ToggleChip>
+                <ToggleChip
+                  active={draft.integration === "planned"}
+                  onClick={() => setField("integration", draft.integration === "planned" ? undefined : "planned")}
+                >
+                  Integração prevista
+                </ToggleChip>
               </div>
             </fieldset>
           ) : null}

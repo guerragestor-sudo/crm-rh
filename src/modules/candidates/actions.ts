@@ -65,6 +65,20 @@ export async function changeStatusAction(id: string, statusId: string, reason?: 
   }
 }
 
+export async function confirmIntegrationAction(id: string, date: string): Promise<ActionResult> {
+  try {
+    await authorize("candidates.write");
+    const candidateId = parseId(id);
+    const supabase = await createClient();
+    await service.confirmIntegration(supabase, candidateId, date);
+    revalidateCandidate(candidateId);
+    revalidatePath("/agenda");
+    return ok(undefined);
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
 export async function changeManagerAction(
   id: string,
   managerId: string | null,

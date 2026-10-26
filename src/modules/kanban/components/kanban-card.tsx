@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ContactActions } from "@/modules/candidates/components/contact-actions";
+import { PlannedIntegrationChip } from "@/modules/candidates/components/planned-integration-chip";
 import { isOverdue, NextTaskLabel } from "@/modules/candidates/components/next-task-label";
 import { SlaChip } from "@/modules/candidates/components/sla-chip";
 import type { CandidateListRow } from "@/modules/candidates/types";
@@ -54,6 +55,9 @@ export function KanbanCard({
           <UserRound className="size-3" aria-hidden />
           {candidate.manager?.name ?? "Sem gerente"}
         </span>
+        {!candidate.integration_date && candidate.integration_planned_date ? (
+          <PlannedIntegrationChip date={candidate.integration_planned_date} today={today} />
+        ) : null}
       </div>
       <NextTaskLabel task={candidate.next_task ?? undefined} today={today} nowTime={nowTime} className="mt-2 flex" />
       <div className="mt-2 flex items-center justify-between gap-2">

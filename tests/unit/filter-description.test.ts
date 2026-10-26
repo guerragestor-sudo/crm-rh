@@ -12,6 +12,12 @@ const OPTIONS = {
 };
 
 describe("describeFilters", () => {
+  it("integração prevista em texto", () => {
+    expect(describeFilters({ integration: "planned" }, OPTIONS)).toEqual([
+      { label: "Integração", value: "Integração prevista" },
+    ]);
+  });
+
   it("sem filtros: lista vazia", () => {
     expect(describeFilters({}, OPTIONS)).toEqual([]);
   });

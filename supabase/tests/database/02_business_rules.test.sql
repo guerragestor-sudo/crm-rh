@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 set local role postgres;
 set local search_path to public, extensions;
 
-select plan(19);
+select plan(23);
 
 insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000000', '11111111-0000-4000-8000-0000000000d1', 'authenticated', 'authenticated', 'd-admin@test.local', '{"full_name":"D Admin"}');
@@ -83,6 +83,32 @@ update public.candidates set integration_date = null where id = '55555555-0000-4
 select is(
   (select sla_days_frozen from public.candidates where id = '55555555-0000-4000-8000-0000000000d1'),
   null::integer, 'Sem integração, SLA congelado é limpo');
+
+-- Integração prevista: aceita data futura e some quando a integração é confirmada.
+select lives_ok(
+  $$ update public.candidates set integration_planned_date = (now() at time zone 'America/Sao_Paulo')::date + 5
+      where id = '55555555-0000-4000-8000-0000000000d1' $$,
+  'Integração prevista aceita data futura');
+
+select ok(
+  exists (select 1 from public.candidate_history
+          where candidate_id = '55555555-0000-4000-8000-0000000000d1' and action = 'updated'
+            and field = 'integration_planned_date' and old_value is null and new_value is not null),
+  'Integração prevista registrada no histórico');
+
+update public.candidates set integration_date = (now() at time zone 'America/Sao_Paulo')::date
+ where id = '55555555-0000-4000-8000-0000000000d1';
+select is(
+  (select integration_planned_date from public.candidates where id = '55555555-0000-4000-8000-0000000000d1'),
+  null::date, 'Confirmar a integração limpa a data prevista');
+
+select is(
+  (select count(*) from public.candidate_history
+    where candidate_id = '55555555-0000-4000-8000-0000000000d1'
+      and field = 'integration_planned_date' and new_value is null),
+  0::bigint, 'Limpeza automática da prevista não gera linha extra no histórico');
+
+update public.candidates set integration_date = null where id = '55555555-0000-4000-8000-0000000000d1';
 
 -- Tarefas -------------------------------------------------------------------
 insert into public.tasks (candidate_id, type, title, due_date)

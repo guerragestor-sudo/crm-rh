@@ -5,8 +5,10 @@ import Link from "next/link";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageContainer, PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
+import { can } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { getCandidateOptions } from "@/modules/candidates/queries";
+import { IntegrationsToConfirm } from "@/modules/candidates/components/integrations-to-confirm";
+import { getCandidateOptions, getIntegrationsToConfirm } from "@/modules/candidates/queries";
 import { NoNextActionList } from "@/modules/tasks/components/no-next-action-list";
 import { TaskDialog } from "@/modules/tasks/components/task-dialog";
 import { TaskList } from "@/modules/tasks/components/task-list";
@@ -34,11 +36,12 @@ export default async function AgendaPage({ searchParams }: PageProps<"/agenda">)
   const view = (AGENDA_VIEWS.some((item) => item.value === viewParam) ? viewParam : "today") as AgendaView;
 
   const context = await getAppContext();
-  const [counts, options, tasks, candidates] = await Promise.all([
+  const [counts, options, tasks, candidates, integrations] = await Promise.all([
     getAgendaCounts(context),
     getCandidateOptions(),
     view === "no_next_action" ? Promise.resolve([]) : getAgendaTasks(view, context),
     view === "no_next_action" ? getNoNextActionCandidates() : Promise.resolve(null),
+    view === "today" ? getIntegrationsToConfirm(context.today) : Promise.resolve([]),
   ]);
 
   const countFor = (value: AgendaView) => (value === "done" ? null : counts[value]);
@@ -101,6 +104,12 @@ export default async function AgendaPage({ searchParams }: PageProps<"/agenda">)
           );
         })}
       </nav>
+
+      <IntegrationsToConfirm
+        rows={integrations}
+        today={context.today}
+        canWrite={can(member.role, "candidates.write")}
+      />
 
       {isEmpty ? (
         <EmptyState

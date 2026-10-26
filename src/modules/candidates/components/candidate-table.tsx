@@ -8,6 +8,7 @@ import { formatPhone } from "@/lib/phone";
 import type { CandidateListRow } from "../types";
 import { ContactActions } from "./contact-actions";
 import { NextTaskLabel } from "./next-task-label";
+import { PlannedIntegrationChip } from "./planned-integration-chip";
 import { SlaChip } from "./sla-chip";
 
 export function CandidateTable({
@@ -57,6 +58,9 @@ export function CandidateTable({
               <TableCell className="text-sm">{candidate.manager?.name ?? "—"}</TableCell>
               <TableCell className="max-w-56">
                 <NextTaskLabel task={candidate.next_task ?? undefined} today={today} nowTime={nowTime} />
+                {!candidate.integration_date && candidate.integration_planned_date ? (
+                  <PlannedIntegrationChip date={candidate.integration_planned_date} today={today} className="mt-1" />
+                ) : null}
               </TableCell>
               <TableCell>
                 <SlaChip days={candidate.sla_days} integrated={Boolean(candidate.integration_date)} target={slaTarget} />

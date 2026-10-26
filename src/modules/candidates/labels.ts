@@ -46,6 +46,7 @@ export const FIELD_LABELS: Record<string, string> = {
   responsible: "Responsável",
   interview_at: "Data da entrevista",
   integration_date: "Data de integração",
+  integration_planned_date: "Integração prevista",
   documentation_status: "Cadastro/documentação",
   documentation_notes: "Observações de documentação",
   course_status: "Curso",

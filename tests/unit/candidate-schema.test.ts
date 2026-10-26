@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   candidateFormSchema,
   emptyCandidateForm,
+  isFutureIntegration,
   isoToLocalDateTime,
   localDateTimeToIso,
   toCandidateWrite,
@@ -66,6 +67,22 @@ describe("toCandidateWrite", () => {
       region_id: null,
       interview_at: "2026-10-08T17:30:00.000Z",
     });
+  });
+});
+
+describe("integração prevista x data de integração", () => {
+  it("prevista aceita data futura e vai para o banco; integração futura é barrada no formulário", () => {
+    const values = {
+      ...emptyCandidateForm(STATUS),
+      full_name: "Maria Silva",
+      integration_planned_date: "2026-10-27",
+    };
+    expect(candidateFormSchema.safeParse(values).success).toBe(true);
+    expect(toCandidateWrite(values)).toMatchObject({ integration_planned_date: "2026-10-27", integration_date: null });
+
+    expect(isFutureIntegration({ integration_date: "2026-10-27" }, "2026-10-26")).toBe(true);
+    expect(isFutureIntegration({ integration_date: "2026-10-26" }, "2026-10-26")).toBe(false);
+    expect(isFutureIntegration({ integration_date: "" }, "2026-10-26")).toBe(false);
   });
 });
 

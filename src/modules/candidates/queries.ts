@@ -18,7 +18,8 @@ export const PAGE_SIZE = 25;
 // Ao ordenar o resultado de uma função, o PostgREST exige a coluna no select:
 // todas as colunas de SORTS precisam estar aqui.
 const LIST_SELECT = `
-  id, full_name, phone, email, created_at, status_changed_at, interview_at, integration_date, archived_at, sla_days,
+  id, full_name, phone, email, created_at, status_changed_at, interview_at, integration_date, integration_planned_date,
+  archived_at, sla_days,
   status:candidate_statuses(id, name, color),
   region:regions(name),
   manager:managers(id, name),
@@ -91,7 +92,8 @@ export async function getCandidate(id: string): Promise<CandidateDetail | null> 
     .from("candidates")
     .select(
       `id, full_name, phone, email, cpf, region_id, segment_id, availability, currently_working, source_id,
-       manager_id, notes, status_id, status_changed_at, interview_at, integration_date, documentation_status,
+       manager_id, notes, status_id, status_changed_at, interview_at, integration_date, integration_planned_date,
+       documentation_status,
        documentation_notes, course_status, course_notes, cavaplay, course_paid_by_cava, sla_days, sla_days_frozen,
        responsible_member_id, archived_at, created_at, updated_at,
        status:candidate_statuses(id, name, color),
@@ -138,4 +140,27 @@ export async function getCandidateHistory(candidateId: string): Promise<HistoryE
       actor_name: actor?.profiles?.full_name ?? null,
     };
   });
+}
+
+export type IntegrationToConfirm = {
+  id: string;
+  full_name: string;
+  integration_planned_date: string;
+  status: { name: string; color: string } | null;
+  manager: { name: string } | null;
+};
+
+/** Integrações combinadas para hoje ou antes e ainda não confirmadas (Agenda). */
+export async function getIntegrationsToConfirm(today: string): Promise<IntegrationToConfirm[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("candidates")
+    .select("id, full_name, integration_planned_date, status:candidate_statuses(name, color), manager:managers(name)")
+    .is("integration_date", null)
+    .is("archived_at", null)
+    .lte("integration_planned_date", today)
+    .order("integration_planned_date", { ascending: true })
+    .limit(100);
+  if (error) throw fromDatabaseError(error, { op: "integrations_to_confirm" });
+  return (data ?? []) as IntegrationToConfirm[];
 }

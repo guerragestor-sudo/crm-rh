@@ -36,6 +36,7 @@ export default async function EditCandidatePage({ params }: PageProps<"/candidat
     notes: candidate.notes ?? "",
     interview_at: isoToLocalDateTime(candidate.interview_at, context.timezone),
     integration_date: candidate.integration_date ?? "",
+    integration_planned_date: candidate.integration_planned_date ?? "",
     documentation_status: candidate.documentation_status as CandidateFormValues["documentation_status"],
     documentation_notes: candidate.documentation_notes ?? "",
     course_status: candidate.course_status as CandidateFormValues["course_status"],

@@ -28,6 +28,7 @@ export type CandidateListRow = {
   created_at: string;
   interview_at: string | null;
   integration_date: string | null;
+  integration_planned_date: string | null;
   archived_at: string | null;
   sla_days: number;
   status: { id: string; name: string; color: string } | null;
@@ -66,6 +67,7 @@ export type CandidateDetail = {
   status_changed_at: string;
   interview_at: string | null;
   integration_date: string | null;
+  integration_planned_date: string | null;
   documentation_status: string;
   documentation_notes: string | null;
   course_status: string;

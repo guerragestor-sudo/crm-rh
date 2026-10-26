@@ -82,6 +82,10 @@ describe("filtros de candidatos", () => {
     expect(withSavedParams({}, "%E0%A4%A")).toEqual({});
   });
 
+  it("aceita o filtro de integração prevista", () => {
+    expect(filtersFromSearchParams({ integration: "planned" })).toEqual({ integration: "planned" });
+  });
+
   it("detecta se a URL já tem filtro ou ordenação", () => {
     expect(hasFilterParams({})).toBe(false);
     expect(hasFilterParams({ q: "maria" })).toBe(false);

@@ -19,7 +19,13 @@ import { cn } from "@/lib/utils";
 
 import { checkDuplicatesAction, createCandidateAction, updateCandidateAction } from "../actions";
 import { AVAILABILITY_OPTIONS, COURSE_OPTIONS, DOCUMENTATION_OPTIONS } from "../labels";
-import { candidateFormSchema, FORM_STEPS, type CandidateFormValues } from "../schema";
+import {
+  candidateFormSchema,
+  FORM_STEPS,
+  FUTURE_INTEGRATION_MESSAGE,
+  isFutureIntegration,
+  type CandidateFormValues,
+} from "../schema";
 import type { CandidateOptions, DuplicateMatch, Option } from "../types";
 import { DuplicateAlert } from "./duplicate-alert";
 
@@ -71,6 +77,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
     trigger,
     setValue,
     setError,
+    clearErrors,
     reset,
     formState: { errors },
   } = form;
@@ -103,7 +110,24 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
     };
   }
 
+  /** Data de integração futura: avisa no campo (antes de ir ao servidor) e leva à etapa dele. */
+  function rejectFutureIntegration(values: Pick<CandidateFormValues, "integration_date">) {
+    if (!isFutureIntegration(values, today)) return false;
+    setError("integration_date", { message: FUTURE_INTEGRATION_MESSAGE }, { shouldFocus: true });
+    setStep(FORM_STEPS.findIndex((item) => (item.fields as readonly string[]).includes("integration_date")));
+    toast.error("Verifique os campos destacados.");
+    return true;
+  }
+
+  function moveToPlanned() {
+    setValue("integration_planned_date", form.getValues("integration_date"), { shouldDirty: true });
+    setValue("integration_date", "", { shouldDirty: true });
+    clearErrors("integration_date");
+  }
+
   async function next() {
+    const stepFields = FORM_STEPS[step].fields as readonly string[];
+    if (stepFields.includes("integration_date") && rejectFutureIntegration(form.getValues())) return;
     const valid = await trigger([...FORM_STEPS[step].fields]);
     if (valid) {
       setStep((current) => Math.min(current + 1, lastStep));
@@ -120,6 +144,7 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
   }
 
   function onSubmit(values: CandidateFormValues) {
+    if (rejectFutureIntegration(values)) return;
     startSubmit(async () => {
       const response =
         mode === "create"
@@ -366,20 +391,41 @@ export function CandidateForm({ mode, candidateId, defaultValues, options, today
             <Input id="interview_at" type="datetime-local" className={inputClass} {...reg("interview_at")} {...ariaFor("interview_at")} />
           </FormField>
           <FormField
-            id="integration_date"
-            label="Data de integração"
-            error={fieldError("integration_date")}
-            hint="Ao preencher, o SLA do candidato é congelado."
+            id="integration_planned_date"
+            label="Integração prevista"
+            error={fieldError("integration_planned_date")}
+            hint="Data combinada para começar (pode ser futura). No dia, confirme a integração na ficha."
           >
             <Input
-              id="integration_date"
+              id="integration_planned_date"
               type="date"
-              max={today}
               className={inputClass}
-              {...reg("integration_date")}
-              {...ariaFor("integration_date")}
+              {...reg("integration_planned_date")}
+              {...ariaFor("integration_planned_date")}
             />
           </FormField>
+          <div className="flex flex-col gap-2">
+            <FormField
+              id="integration_date"
+              label="Data de integração"
+              error={fieldError("integration_date")}
+              hint="Dia em que o candidato começou. Ao preencher, o SLA é congelado."
+            >
+              <Input
+                id="integration_date"
+                type="date"
+                max={today}
+                className={inputClass}
+                {...reg("integration_date")}
+                {...ariaFor("integration_date")}
+              />
+            </FormField>
+            {errors.integration_date?.message === FUTURE_INTEGRATION_MESSAGE ? (
+              <Button type="button" variant="outline" size="sm" className="h-9 self-start" onClick={moveToPlanned}>
+                Mover para integração prevista
+              </Button>
+            ) : null}
+          </div>
           <FormField id="notes" label="Observação" error={fieldError("notes")} className="md:col-span-2">
             <Textarea id="notes" rows={4} className="text-base md:text-sm" {...reg("notes")} {...ariaFor("notes")} />
           </FormField>

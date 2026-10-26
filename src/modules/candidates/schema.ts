@@ -49,6 +49,7 @@ export const candidateFormSchema = z.object({
     .string()
     .refine((value) => value === "" || /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value), { error: "Data inválida." }),
   integration_date: z.union([z.literal(""), z.iso.date({ error: "Data inválida." })]),
+  integration_planned_date: z.union([z.literal(""), z.iso.date({ error: "Data inválida." })]),
   documentation_status: z.enum(DOCUMENTATION_OPTIONS.map((option) => option.value) as ["pending", "in_progress", "complete"]),
   documentation_notes: optionalText(2000),
   course_status: z.enum(COURSE_OPTIONS.map((option) => option.value) as ["not_started", "in_progress", "completed"]),
@@ -77,6 +78,7 @@ export const emptyCandidateForm = (statusId = ""): CandidateFormValues => ({
   notes: "",
   interview_at: "",
   integration_date: "",
+  integration_planned_date: "",
   documentation_status: "pending",
   documentation_notes: "",
   course_status: "not_started",
@@ -91,7 +93,7 @@ export const emptyCandidateForm = (statusId = ""): CandidateFormValues => ({
 export const FORM_STEPS = [
   { title: "Dados pessoais", fields: ["full_name", "phone", "email", "cpf"] },
   { title: "Perfil", fields: ["region_id", "segment_id", "availability", "currently_working", "source_id"] },
-  { title: "Processo", fields: ["status_id", "manager_id", "interview_at", "integration_date", "notes"] },
+  { title: "Processo", fields: ["status_id", "manager_id", "interview_at", "integration_planned_date", "integration_date", "notes"] },
   {
     title: "Cadastro e curso",
     fields: ["documentation_status", "documentation_notes", "course_status", "course_notes", "cavaplay", "course_paid_by_cava"],
@@ -132,6 +134,7 @@ export function toCandidateWrite(values: CandidateFormValues, timeZone = DEFAULT
     notes: emptyToNull(values.notes.trim()),
     interview_at: localDateTimeToIso(values.interview_at, timeZone),
     integration_date: emptyToNull(values.integration_date),
+    integration_planned_date: emptyToNull(values.integration_planned_date),
     documentation_status: values.documentation_status,
     documentation_notes: emptyToNull(values.documentation_notes.trim()),
     course_status: values.course_status,
@@ -142,5 +145,16 @@ export function toCandidateWrite(values: CandidateFormValues, timeZone = DEFAULT
 }
 
 export type CandidateWrite = ReturnType<typeof toCandidateWrite>;
+
+/**
+ * A data de integração é o dia em que o candidato começou: não pode ser futura
+ * (o banco também barra). Data combinada vai em "Integração prevista".
+ */
+export const FUTURE_INTEGRATION_MESSAGE =
+  "Data futura: use “Integração prevista”. A data de integração é o dia em que o candidato começou.";
+
+export function isFutureIntegration(values: Pick<CandidateFormValues, "integration_date">, today: string) {
+  return values.integration_date !== "" && values.integration_date > today;
+}
 
 export const reasonSchema = z.string().trim().max(500, { error: "Máximo de 500 caracteres." });

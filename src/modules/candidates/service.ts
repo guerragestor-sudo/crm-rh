@@ -9,7 +9,13 @@ import { AppError, fromDatabaseError } from "@/server/errors";
 import type { SupabaseServerClient } from "@/server/supabase/server";
 import { sessionInsert } from "@/server/supabase/types";
 
-import { candidateFormSchema, reasonSchema, toCandidateWrite, type CandidateFormValues } from "./schema";
+import {
+  candidateFormSchema,
+  FUTURE_INTEGRATION_MESSAGE,
+  reasonSchema,
+  toCandidateWrite,
+  type CandidateFormValues,
+} from "./schema";
 import type { DuplicateMatch } from "./types";
 
 function parseForm(values: unknown): CandidateFormValues {
@@ -73,6 +79,11 @@ async function assertNoBlockingDuplicate(
 }
 
 function mapWriteError(error: { code?: string; message?: string }, op: string): AppError {
+  // Regras de integração do banco (futura / antes do cadastro): erro no próprio campo.
+  if (error.code === "23514" && error.message?.includes("data de integração")) {
+    const message = error.message.includes("futura") ? FUTURE_INTEGRATION_MESSAGE : error.message;
+    return new AppError("VALIDATION", message, { integration_date: [message] });
+  }
   if (error.code === "23505") {
     if (error.message?.includes("candidates_org_phone_uq")) {
       return new AppError("CONFLICT", "Já existe um candidato com este telefone.", { phone: ["Telefone já cadastrado."] });
@@ -139,6 +150,21 @@ export async function updateCandidate(
   if (managerId !== current.manager_id) {
     await changeManager(supabase, id, managerId, values.manager_reason);
   }
+}
+
+/** Confirma a integração (dia em que o candidato começou): congela o SLA e limpa a prevista. */
+export async function confirmIntegration(supabase: SupabaseServerClient, candidateId: string, date: string): Promise<void> {
+  const parsed = z.iso.date().safeParse(date);
+  if (!parsed.success) throw new AppError("VALIDATION", "Data inválida.", { integration_date: ["Data inválida."] });
+  const { data, error } = await supabase
+    .from("candidates")
+    .update({ integration_date: parsed.data })
+    .eq("id", candidateId)
+    .is("archived_at", null)
+    .select("id")
+    .maybeSingle();
+  if (error) throw mapWriteError(error, "confirm_integration");
+  if (!data) throw new AppError("NOT_FOUND", "Candidato não encontrado.");
 }
 
 export async function changeStatus(

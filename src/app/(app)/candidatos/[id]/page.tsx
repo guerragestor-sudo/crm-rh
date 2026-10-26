@@ -15,6 +15,7 @@ import { ArchiveButton } from "@/modules/candidates/components/archive-button";
 import { CandidateDetails } from "@/modules/candidates/components/candidate-details";
 import { ChangeManagerDialog } from "@/modules/candidates/components/change-manager-dialog";
 import { ChangeStatusDialog } from "@/modules/candidates/components/change-status-dialog";
+import { ConfirmIntegrationDialog } from "@/modules/candidates/components/confirm-integration-dialog";
 import { ContactActions } from "@/modules/candidates/components/contact-actions";
 import { HistoryTimeline } from "@/modules/candidates/components/history-timeline";
 import { getCandidate, getCandidateHistory, getCandidateOptions } from "@/modules/candidates/queries";
@@ -203,9 +204,29 @@ export default async function CandidatePage({ params }: PageProps<"/candidatos/[
             className="text-sm"
           />
         </SummaryItem>
-        <SummaryItem icon={UserCheck} label="Integração">
+        <SummaryItem
+          icon={UserCheck}
+          label="Integração"
+          action={
+            canWrite && !candidate.integration_date ? (
+              <ConfirmIntegrationDialog
+                candidateId={candidate.id}
+                candidateName={candidate.full_name}
+                plannedDate={candidate.integration_planned_date}
+                today={context.today}
+                trigger={
+                  <Button variant="secondary" size="sm" className="h-9 w-full">
+                    Confirmar integração
+                  </Button>
+                }
+              />
+            ) : null
+          }
+        >
           {candidate.integration_date ? (
             formatDate(candidate.integration_date)
+          ) : candidate.integration_planned_date ? (
+            <span>Prevista {formatDate(candidate.integration_planned_date)}</span>
           ) : (
             <span className="text-muted-foreground">Aguardando</span>
           )}

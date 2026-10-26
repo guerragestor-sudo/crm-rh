@@ -43,7 +43,8 @@ export function describeFilters(filters: CandidateFilters, options: ListOptions)
   const integrated = period(filters.integration_from, filters.integration_to);
   if (integrated) lines.push({ label: "Data de integração", value: integrated });
   if (filters.integration) {
-    lines.push({ label: "Integração", value: filters.integration === "done" ? "Integrados" : "Aguardando integração" });
+    const labels = { done: "Integrados", pending: "Aguardando integração", planned: "Integração prevista" } as const;
+    lines.push({ label: "Integração", value: labels[filters.integration] });
   }
   const followUp = [
     filters.has_overdue_task ? "Com tarefa atrasada" : "",

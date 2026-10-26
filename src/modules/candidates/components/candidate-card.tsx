@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import type { CandidateListRow } from "../types";
 import { ContactActions } from "./contact-actions";
 import { NextTaskLabel } from "./next-task-label";
+import { PlannedIntegrationChip } from "./planned-integration-chip";
 import { SlaChip } from "./sla-chip";
 
 export function CandidateCard({
@@ -38,6 +39,9 @@ export function CandidateCard({
               <UserRound className="size-3.5" aria-hidden />
               {candidate.manager.name}
             </span>
+          ) : null}
+          {!candidate.integration_date && candidate.integration_planned_date ? (
+            <PlannedIntegrationChip date={candidate.integration_planned_date} today={today} />
           ) : null}
         </div>
         <div className="mt-2 flex items-center justify-between gap-2">

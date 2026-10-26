@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 set local role postgres;
 set local search_path to public, extensions;
 
-select plan(23);
+select plan(24);
 
 insert into auth.users (instance_id, id, aud, role, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-000000000000', '11111111-0000-4000-8000-0000000000e1', 'authenticated', 'authenticated', 'e-admin@test.local', '{"full_name":"E Admin"}'),
@@ -70,6 +70,12 @@ select is((select count(*) from public.filter_candidates('{"q":"jose@x"}')), 1::
 select is((select count(*) from public.filter_candidates('{"q":"100%"}')), 0::bigint, 'Curingas do LIKE são tratados como texto');
 select is((select count(*) from public.filter_candidates('{"integration":"done"}')), 2::bigint, 'Filtro de integrados');
 select is((select count(*) from public.filter_candidates('{"integration":"pending"}')), 2::bigint, 'Filtro de aguardando integração');
+update public.candidates set integration_planned_date = (now() at time zone 'America/Sao_Paulo')::date + 3
+ where full_name = 'Ana Costa';
+select results_eq(
+  $$ select full_name from public.filter_candidates('{"integration":"planned"}') $$,
+  $$ values ('Ana Costa'::text) $$,
+  'Filtro de integração prevista (aguardando, com data combinada)');
 select is(
   (select count(*) from public.filter_candidates(jsonb_build_object(
      'created_from', ((now() at time zone 'America/Sao_Paulo')::date - 15)::text))),

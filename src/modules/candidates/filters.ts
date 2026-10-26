@@ -24,7 +24,7 @@ export const candidateFiltersSchema = z.object({
   created_to: isoDate,
   integration_from: isoDate,
   integration_to: isoDate,
-  integration: z.enum(["done", "pending"]).optional(),
+  integration: z.enum(["done", "pending", "planned"]).optional(),
   no_next_action: z.boolean().optional(),
   has_overdue_task: z.boolean().optional(),
   missing_phone: z.boolean().optional(),

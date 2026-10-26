@@ -16,7 +16,7 @@ export default async function NewCandidatePage() {
 
   return (
     <PageContainer className="max-w-3xl">
-      <PageHeader title="Novo candidato" description="Só nome e um contato são obrigatórios. Complete o resto depois." />
+      <PageHeader title="Novo candidato" description="Só o nome é obrigatório. Complete o resto depois." />
       <CandidateForm
         mode="create"
         defaultValues={emptyCandidateForm(defaultStatus)}
