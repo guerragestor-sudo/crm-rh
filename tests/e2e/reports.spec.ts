@@ -50,3 +50,21 @@ test("exportação CSV respeita os filtros", async ({ page }) => {
   expect(lines.length - 1).toBe(total);
   for (const line of lines.slice(1)) expect(line).toContain("Fernanda Lima");
 });
+
+test("relatório em PDF com os filtros aplicados", async ({ page }) => {
+  await page.goto("/relatorios");
+  await page.getByRole("button", { name: /Filtros/ }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Fernanda Lima" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Aplicar" }).click();
+  await expect(page).toHaveURL(/manager_ids=/);
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Exportar PDF" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^relatorio-\d{4}-\d{2}-\d{2}\.pdf$/);
+  const content = await readFile((await download.path())!);
+  expect(content.subarray(0, 5).toString()).toBe("%PDF-");
+  expect(content.length).toBeGreaterThan(10_000);
+  await expect(page.getByText("Relatório em PDF gerado.")).toBeVisible();
+  if (process.env.SAVE_REPORT_PDF) await download.saveAs(process.env.SAVE_REPORT_PDF);
+});

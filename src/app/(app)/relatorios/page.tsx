@@ -7,20 +7,28 @@ import { StatCard } from "@/components/shared/stat-card";
 import { formatDays, formatNumber } from "@/lib/format";
 import { can } from "@/lib/permissions";
 import { UrlFilters } from "@/modules/candidates/components/url-filters";
+import { describeFilters } from "@/modules/candidates/filter-description";
 import { countActiveFilters, filtersFromSearchParams } from "@/modules/candidates/filters";
 import { getCandidateOptions } from "@/modules/candidates/queries";
 import { BarList } from "@/modules/dashboard/components/bar-list";
 import { StatusDistribution } from "@/modules/dashboard/components/status-distribution";
 import { getDashboardSummary } from "@/modules/dashboard/queries";
 import { ExportButton } from "@/modules/exports/export-button";
+import { ReportPdfButton } from "@/modules/reports/components/report-pdf-button";
 import { requireMember } from "@/server/auth/session";
+import { getAppContext } from "@/server/context";
 
 export const metadata: Metadata = { title: "Relatórios" };
 
 export default async function ReportsPage({ searchParams }: PageProps<"/relatorios">) {
   const member = await requireMember();
   const filters = filtersFromSearchParams(await searchParams);
-  const [summary, options] = await Promise.all([getDashboardSummary(filters), getCandidateOptions()]);
+  const [summary, options, context] = await Promise.all([
+    getDashboardSummary(filters),
+    getCandidateOptions(),
+    getAppContext(),
+  ]);
+  const canExport = can(member.role, "candidates.export");
   const { totals, sla } = summary;
   const activeFilters = countActiveFilters(filters);
 
@@ -31,7 +39,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/relatori
         description={
           activeFilters > 0
             ? `${activeFilters} ${activeFilters === 1 ? "filtro aplicado" : "filtros aplicados"}. A exportação traz exatamente este resultado.`
-            : "Combine filtros (região, status, gerente, período…) e exporte o resultado em CSV."
+            : "Combine filtros (região, status, gerente, período…) e exporte o resultado em PDF ou CSV."
         }
         actions={
           <>
@@ -51,7 +59,16 @@ export default async function ReportsPage({ searchParams }: PageProps<"/relatori
                 "cava",
               ]}
             />
-            {can(member.role, "candidates.export") ? <ExportButton filters={filters} total={totals.active} /> : null}
+            {canExport ? (
+              <ReportPdfButton
+                summary={summary}
+                filters={filters}
+                filterLines={describeFilters(filters, options)}
+                organizationName={member.organizationName}
+                timezone={context.timezone}
+              />
+            ) : null}
+            {canExport ? <ExportButton filters={filters} total={totals.active} /> : null}
           </>
         }
       />
