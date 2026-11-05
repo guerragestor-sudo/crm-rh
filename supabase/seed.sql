@@ -41,6 +41,14 @@ insert into public.organization_members (id, organization_id, user_id, role) val
   ('c0000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002', 'recruiter'),
   ('c0000000-0000-4000-8000-000000000003', 'b0000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000003', 'admin');
 
+-- Novidades (pop-up após o login): admin e recrutador dos testes E2E já viram todas,
+-- para o pop-up não atrapalhar os outros testes. "outra@crm.local" nunca viu e tem
+-- vínculo antigo: é ela quem o teste das novidades usa.
+update public.organization_members set updates_seen = 1000000
+where id in ('c0000000-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000002');
+update public.organization_members set created_at = '2026-10-01 09:00-03'
+where id = 'c0000000-0000-4000-8000-000000000003';
+
 -- Cadastros de apoio da organização demo -------------------------------------
 insert into public.regions (organization_id, name, sort_order)
 select 'b0000000-0000-4000-8000-000000000001', r.name, r.ord

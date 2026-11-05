@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 import {
   DropdownMenu,
@@ -59,6 +60,13 @@ export function UserMenu({ user, compact = false }: { user: ShellUser; compact?:
           <span className="block truncate text-sm font-medium">{user.fullName}</span>
           <span className="block truncate text-xs text-muted-foreground">{user.organizationName}</span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/novidades">
+            <Sparkles aria-hidden />
+            Novidades
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <form action={signOut}>
           <DropdownMenuItem asChild>

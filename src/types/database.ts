@@ -273,14 +273,14 @@ isOneToOne: false
                   ]
                 },"organization_members": {
                   Row: {
-                    "created_at": string,"id": string,"organization_id": string,"role": string,"status": string,"updated_at": string,"user_id": string
+                    "created_at": string,"id": string,"organization_id": string,"role": string,"status": string,"updated_at": string,"updates_seen": number | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"organization_id": string,"role": string,"status"?: string,"updated_at"?: string,"user_id": string
+                    "created_at"?: string,"id"?: string,"organization_id": string,"role": string,"status"?: string,"updated_at"?: string,"updates_seen"?: number | null,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"organization_id"?: string,"role"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
+                    "created_at"?: string,"id"?: string,"organization_id"?: string,"role"?: string,"status"?: string,"updated_at"?: string,"updates_seen"?: number | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -524,6 +524,9 @@ isOneToOne: false
                            },
 "log_audit_event":
 { Args: { "p_action": string,"p_entity_id"?: string,"p_entity_type": string,"p_metadata"?: Json }; Returns: undefined
+                           },
+"mark_updates_seen":
+{ Args: { "p_seen": number }; Returns: number
                            },
 "next_task":
 { Args: { "c": Omit<Database["public"]['Tables']["candidates"]['Row'], Database["public"]['Tables']["candidates"]['ComputedFields']> }; Returns: Json
