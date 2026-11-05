@@ -4,6 +4,10 @@ import type { NextConfig } from "next";
 // nenhum dado de organização pode ir para cache compartilhado (ver docs/DECISIONS.md).
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Importação de planilha: até 1.000 candidatos com observação numa só ação.
+    serverActions: { bodySizeLimit: "5mb" },
+  },
   turbopack: {
     rules: {
       "*.css": {

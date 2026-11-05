@@ -25,7 +25,7 @@ import {
   formatDateBr,
   parseSheet,
   yearFromTabName,
-} from "./lib/sheet-import.mjs";
+} from "../src/modules/imports/sheet-rules.mjs";
 
 const { values: args, positionals } = parseArgs({
   allowPositionals: true,

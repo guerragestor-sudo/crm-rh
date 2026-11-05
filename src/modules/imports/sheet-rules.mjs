@@ -1,7 +1,7 @@
-// Conversão da planilha "ESTEIRA" (uma aba por ciclo, ex.: SETE.26) em candidatos do CRM.
+// Regras de conversão de texto de planilha → cadastros do CRM (aba "ESTEIRA", ex.: SETE.26).
 //
-// Funções puras (sem banco): o script import-planilha.mjs usa este módulo para o
-// relatório prévio e para a gravação. Regras combinadas com o usuário em 24/10/2026:
+// Funções puras (sem banco), usadas pela tela /candidatos/importar e pelo script
+// import-planilha.mjs (importação da SETE.26). Regras combinadas com o usuário em 24/10/2026:
 //  * duplicidade pelo telefone (não pelo CPF); sem telefone válido → "telefone pendente";
 //  * status fora dos 6 padrões: "Ativo" e "Sem perfil" viram status novos; Declinou,
 //    não tem interesse e Quantum → Desistiu; cadastro em andamento e "ok" → Encaminhado;
@@ -52,13 +52,16 @@ export function fold(value) {
     .toLowerCase();
 }
 
-/** "RENATA" → "Renata"; "são domingos" → "São Domingos" (preposições em minúsculas). */
+/** "RENATA" → "Renata"; "são domingos" → "São Domingos" (preposições em minúsculas); siglas ("ABC", "SP") ficam. */
 export function titleCase(value) {
   const small = new Set(["da", "de", "do", "das", "dos", "e"]);
   return clean(value)
-    .toLowerCase()
     .split(" ")
-    .map((word, index) => (index > 0 && small.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+    .map((original, index) => {
+      if (/^[A-Z]{2,3}$/.test(original)) return original;
+      const word = original.toLowerCase();
+      return index > 0 && small.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1);
+    })
     .join(" ");
 }
 
@@ -207,11 +210,19 @@ export function mapSegment(raw) {
   return { name: rule[1], original: rule[2].test(folded) ? null : text };
 }
 
-/** Só "avaliar" tem equivalente no CRM (A combinar). */
+const AVAILABILITY_RULES = [
+  [/^(imediat[ao]|imediatamente|ja)$/, "immediate"],
+  [/^(ate )?15 dias$/, "up_to_15_days"],
+  [/^(ate )?30 dias$/, "up_to_30_days"],
+  [/^(avaliar|a combinar)$/, "to_negotiate"],
+];
+
+/** Opções do CRM (Imediata, Até 15/30 dias, A combinar) e "avaliar" (= A combinar). */
 export function mapAvailability(raw) {
   const text = clean(raw);
   if (!text) return { value: null, original: null };
-  if (fold(text) === "avaliar") return { value: "to_negotiate", original: null };
+  const rule = AVAILABILITY_RULES.find(([pattern]) => pattern.test(fold(text)));
+  if (rule) return { value: rule[1], original: null };
   return { value: null, original: text };
 }
 
@@ -220,6 +231,8 @@ export function mapWorking(raw) {
   const text = clean(raw);
   if (!text) return { value: null, original: null };
   const folded = fold(text);
+  if (folded === "sim") return { value: true, original: null };
+  if (folded === "nao") return { value: false, original: null };
   if (/^(nao trabalha|desempregad|seguro desemprego|segura dese)/.test(folded)) {
     return { value: false, original: folded === "nao trabalha" ? null : text };
   }
@@ -230,17 +243,24 @@ export function mapWorking(raw) {
 export function mapDocumentation(raw) {
   const text = clean(raw);
   const folded = fold(text);
-  if (!text) return { status: "pending", notes: null };
-  if (folded === "ok") return { status: "complete", notes: null };
+  if (!text || folded === "pendente") return { status: "pending", notes: null };
+  if (/^(ok|complet[ao])$/.test(folded)) return { status: "complete", notes: null };
+  if (folded === "em andamento") return { status: "in_progress", notes: null };
   if (folded.startsWith("cad")) return { status: "in_progress", notes: text };
   return { status: "pending", notes: text };
+}
+
+/** "Sim", "S", "x", "ok"… = sim; vazio e qualquer outro texto = não. */
+export function isYes(raw) {
+  return /^(sim|s|x|yes|y|ok|1|true|verdadeiro)$/.test(fold(raw));
 }
 
 export function mapCourse(raw) {
   const text = clean(raw);
   const folded = fold(text);
-  if (!text) return { status: "not_started", notes: null };
-  if (folded === "ok") return { status: "completed", notes: null };
+  if (!text || folded === "nao iniciado") return { status: "not_started", notes: null };
+  if (/^(ok|concluid[oa])$/.test(folded)) return { status: "completed", notes: null };
+  if (folded === "em andamento") return { status: "in_progress", notes: null };
   if (folded.includes("faltante")) return { status: "in_progress", notes: text };
   return { status: "not_started", notes: text };
 }
@@ -378,8 +398,8 @@ export function parseSheet(values, { tab, year, today, importDate }) {
         documentation_notes: documentation.notes,
         course_status: course.status,
         course_notes: course.notes,
-        cavaplay: fold(cell(row, "cavaplay")) === "sim",
-        course_paid_by_cava: fold(cell(row, "coursePaid")) === "sim",
+        cavaplay: isYes(cell(row, "cavaplay")),
+        course_paid_by_cava: isYes(cell(row, "coursePaid")),
       },
     });
   });

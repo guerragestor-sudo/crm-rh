@@ -341,7 +341,9 @@ Continuam fora: WhatsApp em massa, discador, IA, automações complexas, cobran�
 
 ## 11. Importar uma aba da planilha (ESTEIRA)
 
-Script: `scripts/import-planilha.mjs`. Regras de conversão em `scripts/lib/sheet-import.mjs` (com testes em `tests/unit/sheet-import.test.ts`).
+**No dia a dia, use a tela do CRM:** Candidatos → **Importar planilha** (decisão P14 em `docs/DECISIONS.md`). Ela exige a migration `20261105120000_candidate_imports.sql` aplicada antes do código (`npx supabase db push`, seção 2). O script abaixo fica para cargas fora do padrão, feitas pelo terminal.
+
+Script: `scripts/import-planilha.mjs`. Regras de conversão em `src/modules/imports/sheet-rules.mjs` (as mesmas da tela Importar planilha, com testes em `tests/unit/sheet-import.test.ts`).
 
 1. Exporte a aba para `imports/<aba>.json` no formato da API do Google Sheets (`{ "range": "SETE.26!A1:R120", "values": [...] }`). A pasta `imports/` não vai para o git: são dados pessoais.
 2. Faça o backup do banco (seção 9).

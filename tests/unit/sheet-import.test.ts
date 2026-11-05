@@ -17,7 +17,7 @@ import {
   parseDayMonth,
   parseSheet,
   yearFromTabName,
-} from "../../scripts/lib/sheet-import.mjs";
+} from "@/modules/imports/sheet-rules.mjs";
 
 const HEADER = ["", ...Object.values(COLUMNS)];
 

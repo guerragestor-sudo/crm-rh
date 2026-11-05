@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { FileSpreadsheet, Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -39,12 +39,22 @@ export default async function CandidatesPage({ searchParams }: PageProps<"/candi
         title="Candidatos"
         description="Busque, filtre e acompanhe sua base."
         actions={
-          <Button asChild className="hidden h-10 md:inline-flex">
-            <Link href="/candidatos/novo">
-              <Plus aria-hidden />
-              Novo candidato
-            </Link>
-          </Button>
+          can(member.role, "candidates.write") ? (
+            <>
+              <Button asChild variant="outline" className="h-10">
+                <Link href="/candidatos/importar">
+                  <FileSpreadsheet aria-hidden />
+                  Importar planilha
+                </Link>
+              </Button>
+              <Button asChild className="hidden h-10 md:inline-flex">
+                <Link href="/candidatos/novo">
+                  <Plus aria-hidden />
+                  Novo candidato
+                </Link>
+              </Button>
+            </>
+          ) : null
         }
       />
       <CandidateBrowser

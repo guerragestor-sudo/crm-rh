@@ -113,6 +113,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"candidate_imports": {
+                  Row: {
+                    "created_at": string,"created_by_member_id": string,"file_name": string,"id": string,"organization_id": string,"row_count": number,"undone_at": string | null,"undone_by_member_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by_member_id": string,"file_name": string,"id"?: string,"organization_id": string,"row_count": number,"undone_at"?: string | null,"undone_by_member_id"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by_member_id"?: string,"file_name"?: string,"id"?: string,"organization_id"?: string,"row_count"?: number,"undone_at"?: string | null,"undone_by_member_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "candidate_imports_organization_id_created_by_member_id_fkey"
+      columns: ["organization_id","created_by_member_id"]
+isOneToOne: false
+      referencedRelation: "organization_members"
+      referencedColumns: ["organization_id","id"]
+    },{
+      foreignKeyName: "candidate_imports_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "candidate_imports_organization_id_undone_by_member_id_fkey"
+      columns: ["organization_id","undone_by_member_id"]
+isOneToOne: false
+      referencedRelation: "organization_members"
+      referencedColumns: ["organization_id","id"]
+    }
+                  ]
                 },"candidate_statuses": {
                   Row: {
                     "color": string,"created_at": string,"id": string,"is_active": boolean,"name": string,"organization_id": string,"position": number,"updated_at": string
@@ -135,17 +167,23 @@ isOneToOne: false
                   ]
                 },"candidates": {
                   Row: {
-                    "archived_at": string | null,"archived_by_member_id": string | null,"availability": string | null,"cavaplay": boolean,"course_notes": string | null,"course_paid_by_cava": boolean,"course_status": string,"cpf": string | null,"created_at": string,"created_by_member_id": string | null,"currently_working": boolean | null,"documentation_notes": string | null,"documentation_status": string,"email": string | null,"full_name": string,"id": string,"integration_date": string | null,"integration_planned_date": string | null,"interview_at": string | null,"manager_id": string | null,"notes": string | null,"organization_id": string,"phone": string | null,"region_id": string | null,"responsible_member_id": string,"search_text": string | null,"segment_id": string | null,"sla_days_frozen": number | null,"sla_frozen_at": string | null,"source_id": string | null,"status_changed_at": string,"status_id": string,"updated_at": string,"updated_by_member_id": string | null,"next_task": Json | null,"sla_days": number | null
+                    "archived_at": string | null,"archived_by_member_id": string | null,"availability": string | null,"cavaplay": boolean,"course_notes": string | null,"course_paid_by_cava": boolean,"course_status": string,"cpf": string | null,"created_at": string,"created_by_member_id": string | null,"currently_working": boolean | null,"documentation_notes": string | null,"documentation_status": string,"email": string | null,"full_name": string,"id": string,"import_id": string | null,"integration_date": string | null,"integration_planned_date": string | null,"interview_at": string | null,"manager_id": string | null,"notes": string | null,"organization_id": string,"phone": string | null,"region_id": string | null,"responsible_member_id": string,"search_text": string | null,"segment_id": string | null,"sla_days_frozen": number | null,"sla_frozen_at": string | null,"source_id": string | null,"status_changed_at": string,"status_id": string,"updated_at": string,"updated_by_member_id": string | null,"next_task": Json | null,"sla_days": number | null
                   }
                   ComputedFields: "next_task" | "sla_days"
                   Insert: {
-                    "archived_at"?: string | null,"archived_by_member_id"?: string | null,"availability"?: string | null,"cavaplay"?: boolean,"course_notes"?: string | null,"course_paid_by_cava"?: boolean,"course_status"?: string,"cpf"?: string | null,"created_at"?: string,"created_by_member_id"?: string | null,"currently_working"?: boolean | null,"documentation_notes"?: string | null,"documentation_status"?: string,"email"?: string | null,"full_name": string,"id"?: string,"integration_date"?: string | null,"integration_planned_date"?: string | null,"interview_at"?: string | null,"manager_id"?: string | null,"notes"?: string | null,"organization_id": string,"phone"?: string | null,"region_id"?: string | null,"responsible_member_id": string,"search_text"?: never,"segment_id"?: string | null,"sla_days_frozen"?: number | null,"sla_frozen_at"?: string | null,"source_id"?: string | null,"status_changed_at"?: string,"status_id": string,"updated_at"?: string,"updated_by_member_id"?: string | null
+                    "archived_at"?: string | null,"archived_by_member_id"?: string | null,"availability"?: string | null,"cavaplay"?: boolean,"course_notes"?: string | null,"course_paid_by_cava"?: boolean,"course_status"?: string,"cpf"?: string | null,"created_at"?: string,"created_by_member_id"?: string | null,"currently_working"?: boolean | null,"documentation_notes"?: string | null,"documentation_status"?: string,"email"?: string | null,"full_name": string,"id"?: string,"import_id"?: string | null,"integration_date"?: string | null,"integration_planned_date"?: string | null,"interview_at"?: string | null,"manager_id"?: string | null,"notes"?: string | null,"organization_id": string,"phone"?: string | null,"region_id"?: string | null,"responsible_member_id": string,"search_text"?: never,"segment_id"?: string | null,"sla_days_frozen"?: number | null,"sla_frozen_at"?: string | null,"source_id"?: string | null,"status_changed_at"?: string,"status_id": string,"updated_at"?: string,"updated_by_member_id"?: string | null
                   }
                   Update: {
-                    "archived_at"?: string | null,"archived_by_member_id"?: string | null,"availability"?: string | null,"cavaplay"?: boolean,"course_notes"?: string | null,"course_paid_by_cava"?: boolean,"course_status"?: string,"cpf"?: string | null,"created_at"?: string,"created_by_member_id"?: string | null,"currently_working"?: boolean | null,"documentation_notes"?: string | null,"documentation_status"?: string,"email"?: string | null,"full_name"?: string,"id"?: string,"integration_date"?: string | null,"integration_planned_date"?: string | null,"interview_at"?: string | null,"manager_id"?: string | null,"notes"?: string | null,"organization_id"?: string,"phone"?: string | null,"region_id"?: string | null,"responsible_member_id"?: string,"search_text"?: never,"segment_id"?: string | null,"sla_days_frozen"?: number | null,"sla_frozen_at"?: string | null,"source_id"?: string | null,"status_changed_at"?: string,"status_id"?: string,"updated_at"?: string,"updated_by_member_id"?: string | null
+                    "archived_at"?: string | null,"archived_by_member_id"?: string | null,"availability"?: string | null,"cavaplay"?: boolean,"course_notes"?: string | null,"course_paid_by_cava"?: boolean,"course_status"?: string,"cpf"?: string | null,"created_at"?: string,"created_by_member_id"?: string | null,"currently_working"?: boolean | null,"documentation_notes"?: string | null,"documentation_status"?: string,"email"?: string | null,"full_name"?: string,"id"?: string,"import_id"?: string | null,"integration_date"?: string | null,"integration_planned_date"?: string | null,"interview_at"?: string | null,"manager_id"?: string | null,"notes"?: string | null,"organization_id"?: string,"phone"?: string | null,"region_id"?: string | null,"responsible_member_id"?: string,"search_text"?: never,"segment_id"?: string | null,"sla_days_frozen"?: number | null,"sla_frozen_at"?: string | null,"source_id"?: string | null,"status_changed_at"?: string,"status_id"?: string,"updated_at"?: string,"updated_by_member_id"?: string | null
                   }
                   Relationships: [
                     {
+      foreignKeyName: "candidates_import_fk"
+      columns: ["organization_id","import_id"]
+isOneToOne: false
+      referencedRelation: "candidate_imports"
+      referencedColumns: ["organization_id","id"]
+    },{
       foreignKeyName: "candidates_organization_id_archived_by_member_id_fkey"
       columns: ["organization_id","archived_by_member_id"]
 isOneToOne: false
@@ -450,6 +488,7 @@ isOneToOne: false
 "email": string | null,
 "full_name": string,
 "id": string,
+"import_id": string | null,
 "integration_date": string | null,
 "integration_planned_date": string | null,
 "interview_at": string | null,
@@ -480,6 +519,9 @@ isOneToOne: false
               "archived": boolean,"full_name": string,"id": string,"match": string,"status_name": string
             }[]
                            },
+"import_candidates":
+{ Args: { "p_file_name": string,"p_rows": Json }; Returns: Json
+                           },
 "log_audit_event":
 { Args: { "p_action": string,"p_entity_id"?: string,"p_entity_type": string,"p_metadata"?: Json }; Returns: undefined
                            },
@@ -500,6 +542,9 @@ isOneToOne: false
                            },
 "swap_status_positions":
 { Args: { "p_first": string,"p_second": string }; Returns: undefined
+                           },
+"undo_candidate_import":
+{ Args: { "p_import_id": string }; Returns: number
                            }
           }
           Enums: {
